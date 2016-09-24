@@ -1,0 +1,44 @@
+{
+  "name": "gulp5811",
+  "version": "0.0.1",
+  "description": "gulp task",
+  "main": "gulpfile.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "cssgrace": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-connect": "^5.0.0",
+    "gulp-css-spriter": "^0.3.3",
+    "gulp-dest": "^0.2.3",
+    "gulp-ejs": "^2.2.0",
+    "gulp-if": "^2.0.1",
+    "gulp-less": "^3.1.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-postcss": "^6.2.0",
+    "install": "^0.8.1",
+    "sprity": "^1.0.8",
+    "through2": "^2.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doveaz/gulp5811.git"
+  },
+  "keywords": [
+    "gulp",
+    "task"
+  ],
+  "author": "doveaz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doveaz/gulp5811/issues"
+  },
+  "homepage": "https://github.com/doveaz/gulp5811#readme"
+}
