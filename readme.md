@@ -67,33 +67,33 @@ npm是nodejs的包管理器，用于安装卸载模块
 
 less支持引入，因此你可以事先定义一些变量和mixins(类似函数)
 
-    @import "template/var.less";
+         @import "template/var.less";
 
 比如媒体查询的mixins
       
-     .xs(@rules){
-       @media screen and (max-width:768px){
-         @rules();
-       }
-     }
+        .xs(@rules){
+          @media screen and (max-width:768px){
+            @rules();
+          }
+        }
         
 然后你就可以在任意地方
  
-    body{
-      height: 50px;
-      .xs({ height: 50px;})
-    }
+        body{
+          height: 50px;
+          .xs({ height: 50px;})
+        }
     
 会自动编译为(最后媒体查询会被gulp-group-css-media-queries插件合并在一起)
 
-    body {
-      height: 50px;
-    }
-    @media screen and (max-width: 768px) {
-      body {
-        height: 50px;
-      }
-    }
+        body {
+          height: 50px;
+        }
+        @media screen and (max-width: 768px) {
+          body {
+            height: 50px;
+          }
+        }
     
     
 + css，js压缩（cssnano）
@@ -102,7 +102,7 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
 
 当前设置兼容性为 
 
-    browsers: ['last 5 versions', 'IE 6-8', '>1%']
+        browsers: ['last 5 versions', 'IE 6-8', '>1%']
     
 + 处理透明度兼容问题,inline-block自动hack
 
@@ -125,11 +125,11 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
 
 将源代码编译至doyo文件夹，并且替换 ()
 
-    <%- include('template/header.html') %>
+        <%- include('template/header.html') %>
     
 为
     
-    {include = "template/header.html" }
+        {include = "template/header.html" }
 
     
 
