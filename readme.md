@@ -2,7 +2,7 @@
 =
 环境准备
 -
-**1.安装nodejs**
+## **1.安装nodejs**
 
 你可以在 [官方网站](https://nodejs.org/en/) 下载（下载最新版），
 或者 [点击这里](https://nodejs.org/dist/v6.6.0/node-v6.6.0-x64.msi)下载,
@@ -12,7 +12,7 @@
 
     node -v
 
-**2.更换npm源（可选）**
+## **2.更换npm源（可选）**
 
 npm是nodejs的包管理器，用于安装卸载模块
 
@@ -21,7 +21,7 @@ npm是nodejs的包管理器，用于安装卸载模块
 
     npm config set registry https://registry.npm.taobao.org 
     
-**3.npm常用命令**
+## **3.npm常用命令**
 
 安装包   
 
@@ -39,7 +39,7 @@ npm是nodejs的包管理器，用于安装卸载模块
   
         npm install --save gulp
         
-**4.开始使用**
+## **4.开始使用**
 
 下载本项目至本地，cmd 定位到 本项目根目录。
 
@@ -57,7 +57,7 @@ npm是nodejs的包管理器，用于安装卸载模块
 启动本地服务器（也可以使用处于同一局域网的其他设备打开）
 将会监视HTML、CSS、JS文件变化，自动编译，自动刷新浏览器。
 
-**5.实现的功能**
+## **5.实现的功能**
 
 + HTML 模板引入（ejs模板引擎，具体语法参照 [mde/ejs](https://github.com/mde/ejs)）
 
@@ -106,10 +106,34 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
     
 + 处理透明度兼容问题,inline-block自动hack
 
-**6.目录结构**
+## **6.目录结构**
+#### 假设test为项目目录
+
+>gulp
+>>node_modules<br> 
+test
+>>>dist
+
+>>>www
+
+>>>>css<br>js<br>images
+
+>>>doyo
+
+>>.gitignore<br>
+gulpfile.js<br>
+package.json<br>
+readme.md<br>
 
 
-**7.各任务简介**
++ dist 开发、发行目录
+
++ doyo doyocms目录
+
++ node_modules node模块
+
+
+## **7.各任务简介**
 
 + 默认任务
 
@@ -125,11 +149,11 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
 
 将源代码编译至doyo文件夹，并且替换 ()
 
-        <%- include('template/header.html') %>
+         <%- include('template/header.html') %>
     
 为
     
-        {include = "template/header.html" }
+         {include = "template/header.html" }
 
     
 
