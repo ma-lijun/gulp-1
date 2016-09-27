@@ -1,0 +1,39 @@
+
+@import "template/var.less";
+body{
+  display: flex;
+  flex: 1;
+  .xs({display: block})
+}
+a{
+  .xs({ display: block;})
+}
+b{
+  .xs({color:red})
+}
+body{
+  height: 50px;
+  .xs({ height: 50px;})
+}
+
+
+body{
+  height: 50px;
+  width: 100px;
+  background-color: blue;
+  a{
+    color:red
+  }
+}
+
+body{
+  animation: zz 3s infinite;
+  @keyframes zz{
+    from{
+      width: 50px;
+    }
+    to{
+      width: 100px;
+    }
+  }
+}
