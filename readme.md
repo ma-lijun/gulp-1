@@ -49,7 +49,7 @@ npm是nodejs的包管理器，用于安装卸载模块
 
     npm i
     
-安装完成后打开gulpfile.js文件，修改第三行目录为在做项目的项目目录（建议将项目移动进来），之后在CMD输入
+安装完成后打开gulpfile.js文件，修改第三行根目录为在做项目的项目目录（以test文件夹为例），之后在CMD输入
 
     gulp 
     
@@ -218,6 +218,11 @@ readme.md<br>
 
         gulp dist
     
+    
++ 只监视文件并自动刷新浏览器
+
+        gulp justwatch
+
 + doyo发布
 
         gulp doyo

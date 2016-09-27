@@ -28,6 +28,7 @@
     "gulp-postcss": "^6.2.0",
     "gulp-replace": "^0.5.4",
     "gulp-sequence": "^0.4.6",
+    "open": "0.0.5",
     "through2": "^2.0.1"
   },
   "devDependencies": {},

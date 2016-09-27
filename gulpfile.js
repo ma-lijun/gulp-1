@@ -57,6 +57,7 @@ var assetGlobs = {
 
 // 模块调用
 var gulp = require('gulp'),
+    open = require("open"),
     gulpSequence = require('gulp-sequence'),
     gulpif = require('gulp-if'),
     cssnano = require('gulp-cssnano'),
@@ -79,7 +80,7 @@ var gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', ['watch', 'ejs', 'less', 'js','css', 'images', 'connect']);
+gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js','css', 'images', 'connect'],'open'));
 
 //发布 会清理html和css模板文件,并且压缩css，js
 gulp.task('dist', gulpSequence('copy-to-dist', 'clean', 'minify'));
@@ -98,6 +99,10 @@ gulp.task('connect', function () {
     })
 });
 
+gulp.task('open',function(){
+    open("http://localhost:"+serverPort.toString());
+});
+
 //监视文件
 gulp.task('watch', function () {
     gulp.watch(assetGlobs.html, ['ejs']);
@@ -106,6 +111,38 @@ gulp.task('watch', function () {
     gulp.watch(assetGlobs.images, ['images']);
     gulp.watch(assetGlobs.js,['js'])
 });
+
+
+gulp.task('justwatch',function(){
+        connect.server({
+            port: serverPort,
+            host: serverHost,
+            root: www,
+            livereload: true,
+            index: serverIndex
+    });
+    gulp.watch(assetGlobs.html, function(){
+        gulp.src(assetGlobs.html)
+            .pipe(connect.reload())
+    });
+    gulp.watch(assetGlobs.less, function(){
+        gulp.src(assetGlobs.less)
+            .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
+            .pipe(less())
+            .pipe(gulp.dest(asset.css))
+            .pipe(connect.reload())
+    });
+    gulp.watch(assetGlobs.css, function(){
+        gulp.src(assetGlobs.css)
+            .pipe(connect.reload())
+    });
+    gulp.watch(assetGlobs.js,function(){
+        gulp.src(assetGlobs.js)
+            .pipe(connect.reload())
+    });
+    open("http://localhost:"+serverPort.toString());
+});
+
 
 //编译ejs
 gulp.task('ejs', function () {
