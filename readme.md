@@ -112,6 +112,10 @@ npm是nodejs的包管理器，用于安装卸载模块
           }
         }
         自动编译为
+        body {
+          -webkit-animation: zz 3s infinite;
+                  animation: zz 3s infinite;
+        }
         @-webkit-keyframes zz {
           from {
             width: 50px;
