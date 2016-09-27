@@ -69,7 +69,7 @@ npm是nodejs的包管理器，用于安装卸载模块
 
         browsers: ['last 10 versions', 'IE 6-8', '>1%']
            
-+ less 自动编译（语法参照 [less中文网](http://lesscss.cn/)），less是css的超集，因此即使你不想使用less，可以直接在里面写css
++ less 自动编译（语法参照 [less中文网](http://lesscss.cn/)），less是css的超集，因此即使你不想使用less，可以直接在里面写css，sublime用户请自行安装less插件以支持语法高亮
 
     less支持引入，例如
     
