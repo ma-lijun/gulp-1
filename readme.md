@@ -63,13 +63,77 @@ npm是nodejs的包管理器，用于安装卸载模块
 
         <%- include('template/header.html') %>
        
++ 自动加浏览器前缀
+
+    当前设置兼容性为 
+
+        browsers: ['last 10 versions', 'IE 6-8', '>1%']
+           
 + less 自动编译（语法参照 [less中文网](http://lesscss.cn/)），less是css的超集，因此即使你不想使用less，可以直接在里面写css
 
-less支持引入，因此你可以事先定义一些变量和mixins(类似函数)
+    less支持引入，例如
+    
+        /*头部*/
+        @import "template/header.less";
+        
+        /*底部*/
+        @import "template/foot.less";
+        
+        /*公用模块*/
+        @import "template/zz.less";
+        
+     less支持嵌套，比如
+     
+        body{
+          height: 50px;
+          a{
+            color:red
+          }
+        }
+        编译为
+        body {
+          height: 50px;
+        }
+        body a {
+          color: red;
+        }
+        
+    嵌套里的media query 和 @keyframes 会自动跳出，比如
+    
+        body{
+          animation: zz 3s infinite;
+          @keyframes zz{
+            from{
+              width: 50px;
+            }
+            to{
+              width: 100px;
+            }
+          }
+        }
+        自动编译为
+        @-webkit-keyframes zz {
+          from {
+            width: 50px;
+          }
+          to {
+            width: 100px;
+          }
+        }
+        @keyframes zz {
+          from {
+            width: 50px;
+          }
+          to {
+            width: 100px;
+          }
+        }
+    
+    还可以事先定义一些变量和mixins(类似函数)并引入
 
          @import "template/var.less";
 
-比如媒体查询的mixins
+    比如媒体查询的mixins
       
         .xs(@rules){
           @media screen and (max-width:768px){
@@ -77,14 +141,14 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
           }
         }
         
-然后你就可以在任意地方
+    然后就可以在任意地方
  
         body{
           height: 50px;
           .xs({ height: 50px;})
         }
     
-会自动编译为(最后媒体查询会被gulp-group-css-media-queries插件合并在一起)
+        会自动编译为(最后媒体查询会被gulp-group-css-media-queries插件合并在一起)
 
         body {
           height: 50px;
@@ -94,17 +158,19 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
             height: 50px;
           }
         }
+        
+    
     
     
 + css，js压缩（cssnano）
-+ 自动加浏览器前缀
 
-
-当前设置兼容性为 
-
-        browsers: ['last 5 versions', 'IE 6-8', '>1%']
-    
 + 处理透明度兼容问题,inline-block自动hack
+
++ es2015 语 babel自动编译，默认关闭
+
++ 图片压缩 默认关闭
+
++ 自动合并雪碧图并替换css中的background-position（默认没有、、）
 
 ## **6.目录结构**
 #### 假设test为项目目录
@@ -113,6 +179,8 @@ less支持引入，因此你可以事先定义一些变量和mixins(类似函数
 >>node_modules<br> 
 test
 >>>dist
+
+>>>build
 
 >>>www
 
@@ -125,8 +193,11 @@ gulpfile.js<br>
 package.json<br>
 readme.md<br>
 
++ www 源代码
 
-+ dist 开发、发行目录
++ build 开发目录
+
++ dist 发行目录
 
 + doyo doyocms目录
 
@@ -135,7 +206,7 @@ readme.md<br>
 
 ## **7.各任务简介**
 
-+ 默认任务
++ 默认任务，编译源代码到build
 
         gulp
  
@@ -145,7 +216,7 @@ readme.md<br>
     
 + doyo发布
 
-         gulp doyo
+        gulp doyo
 
 将源代码编译至doyo文件夹，并且替换 ()
 
