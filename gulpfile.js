@@ -1,9 +1,9 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
 
-var root = "test/",                //项目目录
+var root = "shijue/",                //项目目录
 
     build = root + 'build/',       //开发目录
-    www = root + 'www/',           //源文件
+    src = root + 'www/',           //源文件
     dist = root + 'dist/',         //发布目录
     doyo = root + 'doyo/',         //发布适合doyo的文件
 
@@ -39,11 +39,11 @@ var doyoDir = {
 
 //静态文件目录
 var asset = {
-    html: www,
-    js: www + 'js/',
-    css: www + 'css/',
-    less: www + 'css/',
-    images: www + "images/"
+    html: src,
+    js: src + 'js/',
+    css: src + 'css/',
+    less: src + 'css/',
+    images: src + "images/"
 };
 
 //静态文件
@@ -80,7 +80,7 @@ var gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js','css', 'images', 'connect'],'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'connect'], 'open'));
 
 //发布 会清理html和css模板文件,并且压缩css，js
 gulp.task('dist', gulpSequence('copy-to-dist', 'clean', 'minify'));
@@ -99,8 +99,8 @@ gulp.task('connect', function () {
     })
 });
 
-gulp.task('open',function(){
-    open("http://localhost:"+serverPort.toString());
+gulp.task('open', function () {
+    open("http://localhost:" + serverPort.toString());
 });
 
 //监视文件
@@ -109,38 +109,37 @@ gulp.task('watch', function () {
     gulp.watch(assetGlobs.less, ['less']);
     gulp.watch(assetGlobs.css, ['css']);
     gulp.watch(assetGlobs.images, ['images']);
-    gulp.watch(assetGlobs.js,['js'])
+    gulp.watch(assetGlobs.js, ['js'])
 });
 
-
-gulp.task('justwatch',function(){
-        connect.server({
-            port: serverPort,
-            host: serverHost,
-            root: www,
-            livereload: true,
-            index: serverIndex
+gulp.task('justwatch', function () {
+    connect.server({
+        port: serverPort,
+        host: serverHost,
+        root: src,
+        livereload: true,
+        index: serverIndex
     });
-    gulp.watch(assetGlobs.html, function(){
+    gulp.watch(assetGlobs.html, function () {
         gulp.src(assetGlobs.html)
             .pipe(connect.reload())
     });
-    gulp.watch(assetGlobs.less, function(){
+    gulp.watch(assetGlobs.less, function () {
         gulp.src(assetGlobs.less)
             .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
             .pipe(less())
             .pipe(gulp.dest(asset.css))
             .pipe(connect.reload())
     });
-    gulp.watch(assetGlobs.css, function(){
+    gulp.watch(assetGlobs.css, function () {
         gulp.src(assetGlobs.css)
             .pipe(connect.reload())
     });
-    gulp.watch(assetGlobs.js,function(){
+    gulp.watch(assetGlobs.js, function () {
         gulp.src(assetGlobs.js)
             .pipe(connect.reload())
     });
-    open("http://localhost:"+serverPort.toString());
+    open("http://localhost:" + serverPort.toString());
 });
 
 
@@ -184,7 +183,7 @@ gulp.task('css', function () {
         .pipe(connect.reload())
 });
 
-gulp.task('js',function(){
+gulp.task('js', function () {
     return gulp.src(assetGlobs.js)
         .pipe(gulpif(babelStatus, babel({
             presets: ['es2015']
@@ -301,7 +300,6 @@ gulp.task('dist-html', function () {
     return gulp.src(assetGlobs.html, {base: asset.html})
         .pipe(ejs())
         .pipe(gulp.dest(dist));
-
 });
 
 gulp.task('dist-image', function () {
@@ -336,7 +334,6 @@ gulp.task('doyo-less', function () {
         }))
         .pipe(postcss(processors))
         .pipe(gulp.dest(doyoDir.css));
-
 });
 
 gulp.task('doyo-html', function () {
