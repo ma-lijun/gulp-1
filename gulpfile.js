@@ -1,6 +1,6 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
 
-var root = "shijue/",                //项目目录
+var root = "biao/",                //项目目录
 
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
@@ -13,28 +13,31 @@ var root = "shijue/",                //项目目录
     serverHost = 'localhost';      //服务器地址
 
 
-var imageminStatus = false,               //是否开启图片压缩
+var imageminStatus = true,         //是否开启图片压缩
     sprite = false,                //是否合并雪碧图
-    babelStatus = false,             //是否使用babel编译js
+    babelStatus = false,           //是否使用babel编译js
     cssminify = true;              //css压缩
 
 //开发目录文件夹
 var buildDir = {
     css: build + 'css',
     images: build + 'images',
-    js: build + 'js'
+    js: build + 'js',
+    fonts: build + 'fonts'
 };
 
 var distDir = {
     css: dist + 'css',
     images: dist + 'images',
-    js: dist + 'js'
+    js: dist + 'js',
+    fonts: dist + 'fonts'
 };
 
 var doyoDir = {
     css: doyo + 'css',
     images: doyo + 'images',
-    js: doyo + 'js'
+    js: doyo + 'js',
+    fonts: doyo + 'fonts'
 };
 
 //静态文件目录
@@ -43,7 +46,8 @@ var asset = {
     js: src + 'js/',
     css: src + 'css/',
     less: src + 'css/',
-    images: src + "images/"
+    images: src + "images/",
+    fonts:src+"fonts/"
 };
 
 //静态文件
@@ -52,7 +56,8 @@ var assetGlobs = {
     js: asset.js + '/*.js',
     css: asset.css + '*.css',
     less: asset.less + '**/*.less',
-    images: asset.images + "**/*.{png,jpg,gif}"
+    images: asset.images + "**/*.{png,jpg,gif}",
+    fonts: asset.fonts + "**/*"
 };
 
 // 模块调用
@@ -80,7 +85,7 @@ var gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'connect'], 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'fonts','connect'], 'open'));
 
 //发布 会清理html和css模板文件,并且压缩css，js
 gulp.task('dist', gulpSequence('copy-to-dist', 'clean', 'minify'));
@@ -109,7 +114,8 @@ gulp.task('watch', function () {
     gulp.watch(assetGlobs.less, ['less']);
     gulp.watch(assetGlobs.css, ['css']);
     gulp.watch(assetGlobs.images, ['images']);
-    gulp.watch(assetGlobs.js, ['js'])
+    gulp.watch(assetGlobs.js, ['js']);
+    gulp.watch(assetGlobs.fonts,['fonts'])
 });
 
 gulp.task('justwatch', function () {
@@ -125,10 +131,14 @@ gulp.task('justwatch', function () {
             .pipe(connect.reload())
     });
     gulp.watch(assetGlobs.less, function () {
+        var processors = [
+            require('cssgrace')
+        ];
         gulp.src(assetGlobs.less)
             .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
             .pipe(less())
-            .pipe(gulp.dest(asset.css))
+            .pipe(postcss(processors))
+            .pipe(gulp.dest(src+'css'))
             .pipe(connect.reload())
     });
     gulp.watch(assetGlobs.css, function () {
@@ -141,7 +151,6 @@ gulp.task('justwatch', function () {
     });
     open("http://localhost:" + serverPort.toString());
 });
-
 
 //编译ejs
 gulp.task('ejs', function () {
@@ -163,9 +172,10 @@ gulp.task('less', function () {
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
         .pipe(less())
         .pipe(autoprefixer({
-            browsers: ['last 10 versions', 'IE 6-8', '>1%']
+            browsers: ['last 10 versions', 'IE 6-10', '>1%']
         }))
         .pipe(postcss(processors))
+        .pipe(gcmq())
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
@@ -174,7 +184,12 @@ gulp.task('less', function () {
 gulp.task('images', function () {
     return gulp.src(assetGlobs.images)
         .pipe(gulp.dest(buildDir.images))
+});
 
+
+gulp.task('fonts',function(){
+    return gulp.src(assetGlobs.fonts,{base: asset.fonts})
+        .pipe(gulp.dest(buildDir.fonts))
 });
 
 gulp.task('css', function () {
@@ -289,7 +304,7 @@ gulp.task('dist-less', function () {
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
         .pipe(less())
         .pipe(autoprefixer({
-            browsers: ['last 5 versions', 'IE 6-8', '>2%']
+            browsers: ['last 10 versions', 'IE 6-8', '>1%']
         }))
         .pipe(postcss(processors))
         .pipe(gulp.dest(distDir.css));
