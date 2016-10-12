@@ -1,6 +1,6 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
 
-var root = "biao/",                //项目目录
+const root = "test/",                //项目目录
 
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
@@ -13,27 +13,26 @@ var root = "biao/",                //项目目录
     serverHost = 'localhost';      //服务器地址
 
 
-var imageminStatus = true,         //是否开启图片压缩
-    sprite = false,                //是否合并雪碧图
+const sprite = false,                //是否合并雪碧图
     babelStatus = false,           //是否使用babel编译js
     cssminify = true;              //css压缩
 
 //开发目录文件夹
-var buildDir = {
+const buildDir = {
     css: build + 'css',
     images: build + 'images',
     js: build + 'js',
     fonts: build + 'fonts'
 };
 
-var distDir = {
+const distDir = {
     css: dist + 'css',
     images: dist + 'images',
     js: dist + 'js',
     fonts: dist + 'fonts'
 };
 
-var doyoDir = {
+const doyoDir = {
     css: doyo + 'css',
     images: doyo + 'images',
     js: doyo + 'js',
@@ -41,7 +40,7 @@ var doyoDir = {
 };
 
 //静态文件目录
-var asset = {
+const asset = {
     html: src,
     js: src + 'js/',
     css: src + 'css/',
@@ -51,7 +50,7 @@ var asset = {
 };
 
 //静态文件
-var assetGlobs = {
+const assetGlobs = {
     html: [asset.html + '*.html', asset.html + 'template/*.html'],
     js: asset.js + '/*.js',
     css: asset.css + '*.css',
@@ -61,8 +60,9 @@ var assetGlobs = {
 };
 
 // 模块调用
-var gulp = require('gulp'),
+const gulp = require('gulp'),
     open = require("open"),
+    contact=require("gulp-concat"),
     gulpSequence = require('gulp-sequence'),
     gulpif = require('gulp-if'),
     cssnano = require('gulp-cssnano'),
@@ -74,7 +74,6 @@ var gulp = require('gulp'),
     connect = require('gulp-connect'),
     less = require('gulp-less'),
     replace = require('gulp-replace'),
-    imagemin = require('gulp-imagemin'),
     autoprefixer = require('gulp-autoprefixer'),
     postcss = require('gulp-postcss'),
     spriter = require('gulp-css-spriter'),
@@ -85,7 +84,7 @@ var gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'fonts','connect'], 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'less','contact-less', 'js', 'css', 'images', 'fonts','connect'], 'open'));
 
 //发布 会清理html和css模板文件,并且压缩css，js
 gulp.task('dist', gulpSequence('copy-to-dist', 'clean', 'minify'));
@@ -154,14 +153,17 @@ gulp.task('justwatch', function () {
 
 //编译ejs
 gulp.task('ejs', function () {
+    var Reg = /{{\s*([^\s]*)\s*}}/g;
     return gulp.src(assetGlobs.html, {base: asset.html})
-        .pipe(plumber({errorHandler: notify.onError("ejs编译失败，请检查代码")}))
+        .pipe(plumber({errorHandler: notify.onError("ejs编译失败，请检查代码,模板不存在或语法错误")}))
+        .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
         .pipe(ejs({
             msg: "Hello Gulp!"
         }))
         .pipe(gulp.dest(build))
         .pipe(connect.reload())
 });
+
 
 //编译less
 gulp.task('less', function () {
@@ -179,6 +181,36 @@ gulp.task('less', function () {
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
+gulp.task('contact-less', function () {
+    var processors = [
+        require('cssgrace')
+    ];
+    return gulp.src(assetGlobs.less)
+        .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
+        .pipe(contact('style.css'))
+        .pipe(less())
+        .pipe(autoprefixer({
+            browsers: ['last 10 versions', 'IE 6-10', '>1%']
+        }))
+        .pipe(postcss(processors))
+        .pipe(gcmq())
+        .pipe(gulp.dest(buildDir.css))
+        .pipe(connect.reload())
+});
+
+
+gulp.task('concat', function() {                                //- 创建一个名为 concat 的 task
+    gulp.src(['./css/wap_v3.1.css', './css/wap_v3.1.3.css'])    //- 需要处理的css文件，放到一个字符串数组里
+        .pipe(concat('wap.min.css'))                            //- 合并后的文件名
+        .pipe(minifyCss())                                      //- 压缩处理成一行
+        .pipe(rev())                                            //- 文件名加MD5后缀
+        .pipe(gulp.dest('./css'))                               //- 输出文件本地
+        .pipe(rev.manifest())                                   //- 生成一个rev-manifest.json
+        .pipe(gulp.dest('./rev'));                              //- 将 rev-manifest.json 保存到 rev 目录内
+});
+
+
+
 
 //复制静态文件到build目录
 gulp.task('images', function () {
@@ -215,7 +247,7 @@ gulp.task('clean', function () {
 });
 
 //压缩css，js，图片
-gulp.task('minify', ['jsminify', 'cssnano', 'imagemin']);
+gulp.task('minify', ['jsminify', 'cssnano']);
 
 gulp.task('jsminify', function () {
     return gulp.src(distDir.js + '/*')
@@ -245,11 +277,6 @@ gulp.task('cssnano', function () {
         .pipe(gulp.dest(distDir.css))
 });
 
-gulp.task('imagemin', function () {
-    return gulp.src(distDir.images + '/*')
-        .pipe(gulpif(imagemin, imagemin()))
-        .pipe(gulp.dest(distDir.images))
-});
 
 //清理doyo
 gulp.task('clean-to-doyo', function () {
@@ -258,7 +285,7 @@ gulp.task('clean-to-doyo', function () {
     ]);
 });
 
-gulp.task('minify-to-doyo', ['jsminify-to-doyo', 'cssnano-to-doyo', 'imagemin-to-doyo']);
+gulp.task('minify-to-doyo', ['jsminify-to-doyo', 'cssnano-to-doyo']);
 
 gulp.task('jsminify-to-doyo', function () {
     return gulp.src(doyoDir.js + '/*')
@@ -288,11 +315,7 @@ gulp.task('cssnano-to-doyo', function () {
         .pipe(gulp.dest(doyoDir.css))
 });
 
-gulp.task('imagemin-to-doyo', function () {
-    return gulp.src(doyoDir.images + '/*')
-        .pipe(gulpif(imageminStatus, imagemin()))
-        .pipe(gulp.dest(doyoDir.images))
-});
+
 
 gulp.task('copy-to-dist', gulpSequence('dist-less', 'dist-html', 'dist-image', 'dist-css', 'dist-js'));
 

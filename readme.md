@@ -62,6 +62,10 @@ npm是nodejs的包管理器，用于安装卸载模块
 + HTML 模板引入（ejs模板引擎，具体语法参照 [mde/ejs](https://github.com/mde/ejs)）
 
         <%- include('template/header.html') %>
+        
+        或者
+        
+        {{header}} 默认后缀为html，目录为template
        
 + 自动加浏览器前缀
 
