@@ -187,7 +187,7 @@ gulp.task('contact-less', function () {
     ];
     return gulp.src(assetGlobs.less)
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
-        .pipe(contact('style.css'))
+        .pipe(contact('style.less'))
         .pipe(less())
         .pipe(autoprefixer({
             browsers: ['last 10 versions', 'IE 6-10', '>1%']
