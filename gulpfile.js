@@ -242,7 +242,7 @@ gulp.task('js', function () {
 gulp.task('clean', function () {
     return del([
         dist + 'template/',
-        distDir.css + '/template/'
+        distDir.css + '/less/'
     ]);
 });
 
