@@ -1,6 +1,6 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
 
-const root = "test/",                //项目目录
+const root = "demo/",                //项目目录
 
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
@@ -62,6 +62,7 @@ const gulp = require('gulp'),
     spriter = require('gulp-css-spriter'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
+    babel=require('gulp-babel'),
     cssgrace = require('cssgrace');
 
 //默认任务
