@@ -62,8 +62,6 @@ const gulp = require('gulp'),
     spriter = require('gulp-css-spriter'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
-    through = require('through2'),
-    babel = require('gulp-babel'),
     cssgrace = require('cssgrace');
 
 //默认任务

@@ -53,18 +53,7 @@ npm是nodejs的包管理器，用于安装卸载模块
 
     npm i
     
-    
-#### **附（以下可选）:** 
 
-        现在你也可以使用yarn安装项目的依赖,安装速度比npm快好多倍（yarn是facebook出品的node包管理器） 
-
-        全局安装yarn
-       
-        npm install -g yarnpkg
-        
-        之后在cmd输入
-        
-        yarn
         
     
 安装完成后打开gulpfile.js文件，修改第三行根目录为在做项目的项目目录（以test文件夹为例），之后在CMD输入
