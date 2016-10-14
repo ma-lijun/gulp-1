@@ -66,7 +66,7 @@ const gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'contact-less', 'js', 'css', 'images', 'fonts', 'connect'], 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less'], 'open'));
 
 //服务器配置
 gulp.task('connect', function () {
@@ -117,7 +117,7 @@ gulp.task('less', function () {
         .pipe(autoprefixer({
             browsers: ['last 10 versions', 'IE 6-10', '>1%']
         }))
-        .pipe(postcss(processors))
+        // .pipe(postcss(processors))
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
@@ -133,7 +133,7 @@ gulp.task('contact-less', function () {
         .pipe(autoprefixer({
             browsers: ['last 10 versions', 'IE 6-10', '>1%']
         }))
-        .pipe(postcss(processors))
+        // .pipe(postcss(processors))
         .pipe(gcmq())
         .pipe(gulpif(cssminify, cssnano({
             core: !1
