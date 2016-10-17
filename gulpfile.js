@@ -6,7 +6,7 @@ const root = "",                //项目目录
     src = root + 'www/',           //源文件
 
     serverRoot = build,            //服务器根目录
-    serverPort = '80',             //服务器端口
+    serverPort = '800',             //服务器端口
     serverIndex = "noindex.html",  //服务器默认打开页面（为了显示页面列表，设置noindex.html）
     serverHost = 'localhost';      //服务器地址
 
@@ -59,16 +59,15 @@ const gulp = require('gulp'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
     postcss = require('gulp-postcss'),
-    spriter = require('gulp-css-spriter'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
     babel=require('gulp-babel'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less'], 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less'], 'open'));
 
-gulp.task('doyo', gulpSequence(['del'],[ 'doyo-html', 'less', 'js', 'css', 'images', 'fonts'],'contact-less'));
+gulp.task('doyo', gulpSequence(['del'],[ 'doyo-html', 'contact-less', 'js', 'css', 'images', 'fonts'],'contact-less'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -137,7 +136,8 @@ gulp.task('contact-less', function () {
         // .pipe(postcss(processors))
         .pipe(gcmq())
         .pipe(gulpif(cssminify, cssnano({
-            core: !1
+            core: !1,
+            discardComments:'!1'
         })))
         .pipe(gulp.dest(build+'css'))
         .pipe(connect.reload())
