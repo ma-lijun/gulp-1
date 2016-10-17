@@ -12,7 +12,8 @@
 
     node -v
 
-## **2.更换npm源（可选）**
+
+## **2.开始使用()**
 
 npm是nodejs的包管理器，用于安装卸载模块
 
@@ -20,30 +21,11 @@ npm是nodejs的包管理器，用于安装卸载模块
 在CMD输入以下命令即可切换至淘宝镜像
 
     npm config set registry https://registry.npm.taobao.org 
-    
- 
-    
-## **3.npm常用命令**
 
-安装包   
 
-        npm install  [-g] [--save] <name>
-           
- &lt;name&gt;：node插件名称。例：
- 
-        npm install gulp
+     npm i -g gulp
     
- -g：全局安装(可选)。将会安装在C:\Users\Administrator\AppData\Roaming\npm，并且写入系统环境变量。例：
- 
-        npm install -g gulp
- 
-  --save：作为项目的依赖安装，配置信息将保存至package.json。例：
-  
-        npm install --save gulp
-        
-       
-           
-## **4.开始使用**
+
 
 下载本项目至本地，cmd 定位到 本项目根目录。
 
@@ -51,17 +33,18 @@ npm是nodejs的包管理器，用于安装卸载模块
 
 输入
 
-    npm i
+     npm i
+         
     
+## **3.修改gulpfile.js
 
+  安装完成后打开gulpfile.js文件，修改第三行目录为将要进行项目的目录
+  
+  之后双击          
         
-    
-安装完成后打开gulpfile.js文件，修改第三行根目录为在做项目的项目目录（以test文件夹为例），之后在CMD输入
-
-    gulp 
-    
-    
-启动本地服务器（也可以使用处于同一局域网的其他设备打开）
+        运行.cmd
+  
+将会启动本地服务器
 将会监视HTML、CSS、JS文件变化，自动编译，自动刷新浏览器。
 
 ## **5.实现的功能**

@@ -1,6 +1,6 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
 
-const root = "yingrui/",                //项目目录
+const root = "",                //项目目录
 
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
@@ -68,6 +68,7 @@ const gulp = require('gulp'),
 //默认任务
 gulp.task('default', gulpSequence(['watch', 'ejs', 'less', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less'], 'open'));
 
+gulp.task('doyo', gulpSequence(['del'],[ 'doyo-html', 'less', 'js', 'css', 'images', 'fonts'],'contact-less'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -175,6 +176,12 @@ gulp.task('clean', function () {
     ]);
 });
 
+gulp.task('del',function(){
+    return del([
+        build
+    ])
+});
+
 gulp.task('justwatch', function () {
     connect.server({
         port: serverPort,
@@ -208,4 +215,15 @@ gulp.task('justwatch', function () {
     });
     open("http://localhost:" + serverPort.toString());
 });
-// var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
+
+gulp.task('doyo-html',function(){
+    var Reg = /{{\s*([^\s]*)\s*}}/g;
+    var removeDir=/template\//g;
+    var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
+    return gulp.src(assetGlobs.html)
+        .pipe(plumber({errorHandler:notify.onError('ejs编译失败，模板不存在或语法错误')}))
+        .pipe(replace(Reg,"<%- include('template/$1.html') -%>"))
+        .pipe(replace(removeDir,''))
+        .pipe(replace(doyoReg,'{include="$1"}'))
+        .pipe(gulp.dest(build))
+});
