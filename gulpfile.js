@@ -129,7 +129,7 @@ gulp.task('contactc', function () {
     ];
     return gulp.src(buildDir.css+'/less/*.css')
         .pipe(plumber({errorHandler: notify.onError("css合并错误，请检查代码")}))
-        .pipe(contact('style.css'))
+        .pipe(contact('all.css'))
         .pipe(autoprefixer({
             browsers: ['last 3 versions', 'IE 6-10', '>2%']
         }))
