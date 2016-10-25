@@ -10,8 +10,7 @@ const root = "",                //项目目录
     serverIndex = "noindex.html",  //服务器默认打开页面（为了显示页面列表，设置noindex.html）
     serverHost = 'localhost';      //服务器地址
 
-const sprite = false,                //是否合并雪碧图
-    babelStatus = true,           //是否使用babel编译js
+const babelStatus = true,           //是否使用babel编译js
     cssminify = true;              //css压缩
 
 //开发目录文件夹
@@ -55,7 +54,6 @@ const gulp = require('gulp'),
     stylus = require('gulp-stylus'),
     connect = require('gulp-connect'),
     less = require('gulp-less'),
-    filter = require('gulp-filter'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
     postcss = require('gulp-postcss'),
@@ -65,9 +63,9 @@ const gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch','ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open'));
 
-gulp.task('dev', gulpSequence(['watch','ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open'));
+gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open'));
 
 gulp.task('doyo', gulpSequence(['del'], ['doyo-html', 'contact', 'js', 'css', 'images', 'fonts'], 'contact'));
 //服务器配置
@@ -89,7 +87,16 @@ gulp.task('open', function () {
 //监视文件
 gulp.task('watch', function () {
     gulp.watch(assetGlobs.html, ['ejs']);
-    gulp.watch(asset.less+'*', ['contact']);
+    gulp.watch(asset.less + '*', ['contact']);
+    gulp.watch(asset.css + '**/*', ['css']);
+    gulp.watch(asset.images + '**/*', ['images']);
+    gulp.watch(assetGlobs.js, ['js']);
+    gulp.watch(asset.fonts + '**/*', ['fonts'])
+});
+
+gulp.task('watch-dev', function () {
+    gulp.watch(assetGlobs.html, ['ejs']);
+    gulp.watch(asset.less + '*', ['contact-dev']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
     gulp.watch(assetGlobs.js, ['js']);
@@ -114,14 +121,16 @@ gulp.task('less', function () {
     return gulp.src(asset.less + '*.less')
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
         .pipe(less())
-        .pipe(gulp.dest(buildDir.css+'/less'))
+        .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(gulp.dest(buildDir.css + '/temp'))
         .pipe(connect.reload())
 });
 gulp.task('stylus', function () {
-    return gulp.src(asset.less+'*.styl')
+    return gulp.src(asset.less + '*.styl')
         .pipe(plumber({errorHandler: notify.onError("stylus编译失败，请检查代码")}))
         .pipe(stylus())
-        .pipe(gulp.dest(buildDir.css+'/less'))
+        .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(gulp.dest(buildDir.css + '/temp'))
         .pipe(connect.reload())
 });
 
@@ -129,7 +138,7 @@ gulp.task('contactc', function () {
     var processors = [
         require('cssgrace')
     ];
-    return gulp.src(buildDir.css+'/less/*.css')
+    return gulp.src(buildDir.css + '/temp/*.css')
         .pipe(plumber({errorHandler: notify.onError("css合并错误，请检查代码")}))
         .pipe(contact('all.css'))
         .pipe(autoprefixer({
@@ -144,17 +153,22 @@ gulp.task('contactc', function () {
         .pipe(gulp.dest(build + 'css/'))
         .pipe(connect.reload())
 });
-gulp.task('cleanless',function(){
+gulp.task('cleanless', function () {
     return del([
         buildDir.css + '/less/'
     ]);
 });
-gulp.task('contact',function(){
-    gulpSequence('cleanless',['less','stylus'],'contactc','cleanless')()
+gulp.task('cleantemp',function(){
+    return del([
+        buildDir.css + '/temp/'
+    ]);
+});
+gulp.task('contact', function () {
+    gulpSequence('cleanless', ['less', 'stylus'], 'contactc', 'cleanless','cleantemp')()
 });
 
-gulp.task('contact-dev',function(){
-    gulpSequence('cleanless',['less','stylus'],'contactc')()
+gulp.task('contact-dev', function () {
+    gulpSequence( ['less', 'stylus'], 'contactc','cleantemp')()
 });
 //复制静态文件到build目录
 gulp.task('images', function () {

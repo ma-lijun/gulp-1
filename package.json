@@ -18,7 +18,6 @@
     "gulp-cssnano": "^2.1.2",
     "gulp-dest": "^0.2.3",
     "gulp-ejs": "^2.2.0",
-    "gulp-filter": "^4.0.0",
     "gulp-group-css-media-queries": "^1.1.0",
     "gulp-if": "^2.0.1",
     "gulp-less": "^3.1.0",
