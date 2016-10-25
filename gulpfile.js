@@ -34,7 +34,7 @@ const asset = {
 
 //静态文件
 const assetGlobs = {
-    html: [asset.html + '*.html', asset.html + 'template/*.html'],
+    html: [asset.html + '*.html'],
     js: asset.js + '/*.js',
     css: asset.css + '*.css',
     less: asset.less + '*.{less,styl,css}'
@@ -65,7 +65,9 @@ const gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch','less','stylus','ejs', 'js', 'css', 'images', 'fonts', 'connect'], ['contact'], 'open'));
+gulp.task('default', gulpSequence(['watch','ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open'));
+
+gulp.task('dev', gulpSequence(['watch','ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open'));
 
 gulp.task('doyo', gulpSequence(['del'], ['doyo-html', 'contact', 'js', 'css', 'images', 'fonts'], 'contact'));
 //服务器配置
@@ -148,6 +150,10 @@ gulp.task('cleanless',function(){
     ]);
 });
 gulp.task('contact',function(){
+    gulpSequence('cleanless',['less','stylus'],'contactc','cleanless')()
+});
+
+gulp.task('contact-dev',function(){
     gulpSequence('cleanless',['less','stylus'],'contactc')()
 });
 //复制静态文件到build目录
