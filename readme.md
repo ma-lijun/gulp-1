@@ -18,7 +18,9 @@ gulp
 
 + 之后输入并运行(第一次使用)
 
-       npm config set registry https://registry.npm.taobao.org&&npm i -g gulp&&npm i -g yarn&&yarn
+
+        npm config set registry https://registry.npm.taobao.org&&npm i -g gulp&&npm i -g yarn&&yarn
+       
     
  ![iamge](md/i1.png)
  
