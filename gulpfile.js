@@ -1,4 +1,4 @@
-/*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp5811 */
+/*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp*/
 
 const root = "",                //项目目录
 
@@ -11,7 +11,7 @@ const root = "",                //项目目录
     serverHost = 'localhost';      //服务器地址
 
 const sprite = false,                //是否合并雪碧图
-    babelStatus = false,           //是否使用babel编译js
+    babelStatus = true,           //是否使用babel编译js
     cssminify = true;              //css压缩
 
 //开发目录文件夹
@@ -37,9 +37,7 @@ const assetGlobs = {
     html: [asset.html + '*.html', asset.html + 'template/*.html'],
     js: asset.js + '/*.js',
     css: asset.css + '*.css',
-    less: asset.less + '*.less',
-    images: asset.images + "**/*.{png,jpg,gif}",
-    fonts: asset.fonts + "**/*"
+    less: asset.less + '*.{less,styl,css}'
 };
 
 // 模块调用
@@ -54,8 +52,10 @@ const gulp = require('gulp'),
     minify = require('gulp-minify'),
     ejs = require('gulp-ejs'),
     dest = require('gulp-dest'),
+    stylus=require('gulp-stylus'),
     connect = require('gulp-connect'),
     less = require('gulp-less'),
+    filter = require('gulp-filter'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
     postcss = require('gulp-postcss'),
@@ -65,7 +65,7 @@ const gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less'], 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less']/*, 'open'*/));
 
 gulp.task('doyo', gulpSequence(['del'],[ 'doyo-html', 'contact-less', 'js', 'css', 'images', 'fonts'],'contact-less'));
 //服务器配置
@@ -79,6 +79,7 @@ gulp.task('connect', function () {
     })
 });
 
+
 gulp.task('open', function () {
     open("http://localhost:" + serverPort.toString());
 });
@@ -87,10 +88,10 @@ gulp.task('open', function () {
 gulp.task('watch', function () {
     gulp.watch(assetGlobs.html, ['ejs']);
     gulp.watch(assetGlobs.less, ['less', 'contact-less']);
-    gulp.watch(assetGlobs.css, ['css']);
-    gulp.watch(assetGlobs.images, ['images']);
+    gulp.watch(asset.css+'**/*', ['css']);
+    gulp.watch(asset.images+'**/*', ['images']);
     gulp.watch(assetGlobs.js, ['js']);
-    gulp.watch(assetGlobs.fonts, ['fonts'])
+    gulp.watch(asset.fonts+'**/*', ['fonts'])
 });
 
 //编译ejs
@@ -111,7 +112,7 @@ gulp.task('less', function () {
     var processors = [
         require('cssgrace')
     ];
-    return gulp.src(assetGlobs.less, {base: asset.less})
+        gulp.src(assetGlobs.less, {base: asset.less})
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
         .pipe(less())
         .pipe(autoprefixer({
@@ -126,12 +127,22 @@ gulp.task('contact-less', function () {
     var processors = [
         require('cssgrace')
     ];
+    const fless = filter('*.less',{restore:true});
+    const fstylus = filter('*.styl',{restore:true});
+    const fcss = filter('*.css',{restore:true});
     return gulp.src(assetGlobs.less)
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
-        .pipe(contact('style.less'))
+        .pipe(fcss)
+        .pipe(fcss.restore)
+        .pipe(fless)
         .pipe(less())
+        .pipe(fless.restore)
+        .pipe(fstylus)
+        .pipe(stylus())
+        .pipe(fstylus.restore)
+        .pipe(contact('style.css'))
         .pipe(autoprefixer({
-            browsers: ['last 10 versions', 'IE 6-10', '>1%']
+            browsers: ['last 3 versions', 'IE 6-10', '>2%']
         }))
         // .pipe(postcss(processors))
         .pipe(gcmq())
@@ -139,23 +150,23 @@ gulp.task('contact-less', function () {
             core: !1,
             discardComments:'!1'
         })))
-        .pipe(gulp.dest(build+'css'))
+        .pipe(gulp.dest(build+'css/'))
         .pipe(connect.reload())
 });
 
 //复制静态文件到build目录
 gulp.task('images', function () {
-    return gulp.src(assetGlobs.images)
+    return gulp.src(asset.images+'**/*',{base: asset.images})
         .pipe(gulp.dest(buildDir.images))
 });
 
 gulp.task('fonts', function () {
-    return gulp.src(assetGlobs.fonts, {base: asset.fonts})
+    return gulp.src(asset.fonts+'**/*', {base: asset.fonts})
         .pipe(gulp.dest(buildDir.fonts))
 });
 
 gulp.task('css', function () {
-    return gulp.src(assetGlobs.css)
+    return gulp.src(asset.css+'**/*',{base: asset.css})
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
@@ -182,39 +193,6 @@ gulp.task('del',function(){
     ])
 });
 
-gulp.task('justwatch', function () {
-    connect.server({
-        port: serverPort,
-        host: serverHost,
-        root: src,
-        livereload: true,
-        index: serverIndex
-    });
-    gulp.watch(assetGlobs.html, function () {
-        gulp.src(assetGlobs.html)
-            .pipe(connect.reload())
-    });
-    gulp.watch(assetGlobs.less, function () {
-        var processors = [
-            require('cssgrace')
-        ];
-        gulp.src(assetGlobs.less)
-            .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
-            .pipe(less())
-            .pipe(postcss(processors))
-            .pipe(gulp.dest(src + 'css'))
-            .pipe(connect.reload())
-    });
-    gulp.watch(assetGlobs.css, function () {
-        gulp.src(assetGlobs.css)
-            .pipe(connect.reload())
-    });
-    gulp.watch(assetGlobs.js, function () {
-        gulp.src(assetGlobs.js)
-            .pipe(connect.reload())
-    });
-    open("http://localhost:" + serverPort.toString());
-});
 
 gulp.task('doyo-html',function(){
     var Reg = /{{\s*([^\s]*)\s*}}/g;
