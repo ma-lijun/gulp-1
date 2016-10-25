@@ -5,7 +5,6 @@ gulp
 ## **1.安装nodejs**
 
 你可以在 [官方网站](https://nodejs.org/en/) 下载（下载最新版），
-或者 [点击这里](https://nodejs.org/dist/v6.6.0/node-v6.6.0-x64.msi)下载,
 下载完成之后安装一直选择下一步即可。
 
 ## **2.安装**
