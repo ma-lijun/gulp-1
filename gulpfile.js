@@ -52,7 +52,7 @@ const gulp = require('gulp'),
     minify = require('gulp-minify'),
     ejs = require('gulp-ejs'),
     dest = require('gulp-dest'),
-    stylus=require('gulp-stylus'),
+    stylus = require('gulp-stylus'),
     connect = require('gulp-connect'),
     less = require('gulp-less'),
     filter = require('gulp-filter'),
@@ -61,13 +61,13 @@ const gulp = require('gulp'),
     postcss = require('gulp-postcss'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
-    babel=require('gulp-babel'),
+    babel = require('gulp-babel'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'],['contact-less']/*, 'open'*/));
+gulp.task('default', gulpSequence(['watch','less','stylus','ejs', 'js', 'css', 'images', 'fonts', 'connect'], ['contact'], 'open'));
 
-gulp.task('doyo', gulpSequence(['del'],[ 'doyo-html', 'contact-less', 'js', 'css', 'images', 'fonts'],'contact-less'));
+gulp.task('doyo', gulpSequence(['del'], ['doyo-html', 'contact', 'js', 'css', 'images', 'fonts'], 'contact'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -87,11 +87,11 @@ gulp.task('open', function () {
 //监视文件
 gulp.task('watch', function () {
     gulp.watch(assetGlobs.html, ['ejs']);
-    gulp.watch(assetGlobs.less, ['less', 'contact-less']);
-    gulp.watch(asset.css+'**/*', ['css']);
-    gulp.watch(asset.images+'**/*', ['images']);
+    gulp.watch(asset.less+'*', ['contact']);
+    gulp.watch(asset.css + '**/*', ['css']);
+    gulp.watch(asset.images + '**/*', ['images']);
     gulp.watch(assetGlobs.js, ['js']);
-    gulp.watch(asset.fonts+'**/*', ['fonts'])
+    gulp.watch(asset.fonts + '**/*', ['fonts'])
 });
 
 //编译ejs
@@ -109,37 +109,26 @@ gulp.task('ejs', function () {
 
 //编译less
 gulp.task('less', function () {
-    var processors = [
-        require('cssgrace')
-    ];
-        gulp.src(assetGlobs.less, {base: asset.less})
+    return gulp.src(asset.less + '*.less')
         .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
         .pipe(less())
-        .pipe(autoprefixer({
-            browsers: ['last 10 versions', 'IE 6-10', '>1%']
-        }))
-        // .pipe(postcss(processors))
-        .pipe(gulp.dest(buildDir.css))
+        .pipe(gulp.dest(buildDir.css+'/less'))
+        .pipe(connect.reload())
+});
+gulp.task('stylus', function () {
+    return gulp.src(asset.less+'*.styl')
+        .pipe(plumber({errorHandler: notify.onError("stylus编译失败，请检查代码")}))
+        .pipe(stylus())
+        .pipe(gulp.dest(buildDir.css+'/less'))
         .pipe(connect.reload())
 });
 
-gulp.task('contact-less', function () {
+gulp.task('contactc', function () {
     var processors = [
         require('cssgrace')
     ];
-    const fless = filter('*.less',{restore:true});
-    const fstylus = filter('*.styl',{restore:true});
-    const fcss = filter('*.css',{restore:true});
-    return gulp.src(assetGlobs.less)
-        .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
-        .pipe(fcss)
-        .pipe(fcss.restore)
-        .pipe(fless)
-        .pipe(less())
-        .pipe(fless.restore)
-        .pipe(fstylus)
-        .pipe(stylus())
-        .pipe(fstylus.restore)
+    return gulp.src(buildDir.css+'/less/*.css')
+        .pipe(plumber({errorHandler: notify.onError("css合并错误，请检查代码")}))
         .pipe(contact('style.css'))
         .pipe(autoprefixer({
             browsers: ['last 3 versions', 'IE 6-10', '>2%']
@@ -148,25 +137,32 @@ gulp.task('contact-less', function () {
         .pipe(gcmq())
         .pipe(gulpif(cssminify, cssnano({
             core: !1,
-            discardComments:'!1'
+            discardComments: '!1'
         })))
-        .pipe(gulp.dest(build+'css/'))
+        .pipe(gulp.dest(build + 'css/'))
         .pipe(connect.reload())
 });
-
+gulp.task('cleanless',function(){
+    return del([
+        buildDir.css + '/less/'
+    ]);
+});
+gulp.task('contact',function(){
+    gulpSequence('cleanless',['less','stylus'],'contactc')()
+});
 //复制静态文件到build目录
 gulp.task('images', function () {
-    return gulp.src(asset.images+'**/*',{base: asset.images})
+    return gulp.src(asset.images + '**/*', {base: asset.images})
         .pipe(gulp.dest(buildDir.images))
 });
 
 gulp.task('fonts', function () {
-    return gulp.src(asset.fonts+'**/*', {base: asset.fonts})
+    return gulp.src(asset.fonts + '**/*', {base: asset.fonts})
         .pipe(gulp.dest(buildDir.fonts))
 });
 
 gulp.task('css', function () {
-    return gulp.src(asset.css+'**/*',{base: asset.css})
+    return gulp.src(asset.css + '**/*', {base: asset.css})
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
@@ -187,21 +183,21 @@ gulp.task('clean', function () {
     ]);
 });
 
-gulp.task('del',function(){
+gulp.task('del', function () {
     return del([
         build
     ])
 });
 
 
-gulp.task('doyo-html',function(){
+gulp.task('doyo-html', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
-    var removeDir=/template\//g;
+    var removeDir = /template\//g;
     var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
     return gulp.src(assetGlobs.html)
-        .pipe(plumber({errorHandler:notify.onError('ejs编译失败，模板不存在或语法错误')}))
-        .pipe(replace(Reg,"<%- include('template/$1.html') -%>"))
-        .pipe(replace(removeDir,''))
-        .pipe(replace(doyoReg,'{include="$1"}'))
+        .pipe(plumber({errorHandler: notify.onError('ejs编译失败，模板不存在或语法错误')}))
+        .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
+        .pipe(replace(removeDir, ''))
+        .pipe(replace(doyoReg, '{include="$1"}'))
         .pipe(gulp.dest(build))
 });
