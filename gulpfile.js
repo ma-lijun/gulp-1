@@ -31,14 +31,6 @@ const asset = {
     fonts: src + "fonts/"
 };
 
-//静态文件
-const assetGlobs = {
-    html: [asset.html + '*.html'],
-    js: asset.js + '/*.js',
-    css: asset.css + '*.css',
-    less: asset.less + '*.{less,styl,css}'
-};
-
 // 模块调用
 const gulp = require('gulp'),
     open = require("open"),
@@ -67,7 +59,7 @@ gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts
 
 gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open'));
 
-gulp.task('doyo', gulpSequence(['del'], ['doyo-html', 'contact', 'js', 'css', 'images', 'fonts'], 'contact'));
+gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -86,27 +78,27 @@ gulp.task('open', function () {
 
 //监视文件
 gulp.task('watch', function () {
-    gulp.watch(assetGlobs.html, ['ejs']);
+    gulp.watch(asset.html + '*.html', ['ejs']);
     gulp.watch(asset.less + '*', ['contact']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
-    gulp.watch(assetGlobs.js, ['js']);
+    gulp.watch(asset.js + '/*.js', ['js']);
     gulp.watch(asset.fonts + '**/*', ['fonts'])
 });
 
 gulp.task('watch-dev', function () {
-    gulp.watch(assetGlobs.html, ['ejs']);
+    gulp.watch(asset.html + '*.html', ['ejs']);
     gulp.watch(asset.less + '*', ['contact-dev']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
-    gulp.watch(assetGlobs.js, ['js']);
+    gulp.watch(asset.js + '/*.js', ['js']);
     gulp.watch(asset.fonts + '**/*', ['fonts'])
 });
 
 //编译ejs
 gulp.task('ejs', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
-    return gulp.src(assetGlobs.html, {base: asset.html})
+    return gulp.src(asset.html + '*.html', {base: asset.html})
         .pipe(plumber({errorHandler: notify.onError("ejs编译失败，请检查代码,模板不存在或语法错误")}))
         .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
         .pipe(ejs({
@@ -188,7 +180,8 @@ gulp.task('css', function () {
 });
 
 gulp.task('js', function () {
-    return gulp.src(assetGlobs.js)
+    return gulp.src(asset.js + '/*.js')
+        .pipe(plumber({errorHandler: notify.onError("babel编译失败")}))
         .pipe(gulpif(babelStatus, babel({
             presets: ['es2015']
         })))
@@ -209,12 +202,15 @@ gulp.task('del', function () {
     ])
 });
 
-
+gulp.task('copy-template',function(){
+   return gulp.src(asset.html+'/template/*.html')
+       .pipe(gulp.dest(build+'template/'))
+});
 gulp.task('doyo-html', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
     var removeDir = /template\//g;
     var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
-    return gulp.src(assetGlobs.html)
+    return gulp.src(asset.html + '*.html')
         .pipe(plumber({errorHandler: notify.onError('ejs编译失败，模板不存在或语法错误')}))
         .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
         .pipe(replace(removeDir, ''))
