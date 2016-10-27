@@ -78,7 +78,7 @@ gulp.task('open', function () {
 
 //监视文件
 gulp.task('watch', function () {
-    gulp.watch(asset.html + '*.html', ['ejs']);
+    gulp.watch(asset.html + '/**/*.html', ['ejs']);
     gulp.watch(asset.less + '*', ['contact']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
@@ -87,7 +87,7 @@ gulp.task('watch', function () {
 });
 
 gulp.task('watch-dev', function () {
-    gulp.watch(asset.html + '*.html', ['ejs']);
+    gulp.watch(asset.html + '/**/*.html', ['ejs']);
     gulp.watch(asset.less + '*', ['contact-dev']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
@@ -98,7 +98,7 @@ gulp.task('watch-dev', function () {
 //编译ejs
 gulp.task('ejs', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
-    return gulp.src(asset.html + '*.html', {base: asset.html})
+    return gulp.src(asset.html + '/**/*.html', {base: asset.html})
         .pipe(plumber({errorHandler: notify.onError("ejs编译失败，请检查代码,模板不存在或语法错误")}))
         .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
         .pipe(ejs({
