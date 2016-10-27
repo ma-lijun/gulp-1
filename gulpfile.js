@@ -49,10 +49,8 @@ const gulp = require('gulp'),
     less = require('gulp-less'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
-    postcss = require('gulp-postcss'),
     plumber = require('gulp-plumber'),
-    notify = require('gulp-notify'),
-    cssgrace = require('cssgrace');
+    notify = require('gulp-notify');
 
 //默认任务
 gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open','ip'));
@@ -101,11 +99,9 @@ gulp.task('watch-dev', function () {
 gulp.task('ejs', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
     return gulp.src(asset.html + '/**/*.html', {base: asset.html})
-        .pipe(plumber({errorHandler: notify.onError("ejs编译失败，请检查代码,模板不存在或语法错误")}))
+        .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
         .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
-        .pipe(ejs({
-            msg: "Hello Gulp!"
-        }))
+        .pipe(ejs())
         .pipe(gulp.dest(build))
         .pipe(connect.reload())
 });
@@ -117,7 +113,7 @@ gulp.task('copy-css',function(){
 //编译less
 gulp.task('less', function () {
     return gulp.src(asset.less + '*.less')
-        .pipe(plumber({errorHandler: notify.onError("less编译失败，请检查代码")}))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
         .pipe(less())
         .pipe(gulp.dest(buildDir.css + '/less'))
         .pipe(gulp.dest(buildDir.css + '/temp'))
@@ -125,7 +121,7 @@ gulp.task('less', function () {
 });
 gulp.task('stylus', function () {
     return gulp.src(asset.less + '*.styl')
-        .pipe(plumber({errorHandler: notify.onError("stylus编译失败，请检查代码")}))
+        .pipe(plumber({errorHandler: notify.onError("stylus编译错误<%= error.message %>")}))
         .pipe(stylus())
         .pipe(gulp.dest(buildDir.css + '/less'))
         .pipe(gulp.dest(buildDir.css + '/temp'))
@@ -133,16 +129,12 @@ gulp.task('stylus', function () {
 });
 
 gulp.task('contactc', function () {
-    var processors = [
-        require('cssgrace')
-    ];
     return gulp.src(buildDir.css + '/temp/*.css')
-        .pipe(plumber({errorHandler: notify.onError("css合并错误，请检查代码")}))
+        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
         .pipe(contact('all.css'))
         .pipe(autoprefixer({
             browsers: ['last 3 versions', 'IE 6-10', '>2%']
         }))
-        // .pipe(postcss(processors))
         .pipe(gcmq())
         .pipe(gulpif(cssminify, cssnano({
             core: !1,
@@ -213,7 +205,7 @@ gulp.task('doyo-html', function () {
     var removeDir = /template\//g;
     var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
     return gulp.src(asset.html + '*.html')
-        .pipe(plumber({errorHandler: notify.onError('ejs编译失败，模板不存在或语法错误')}))
+        .pipe(plumber({errorHandler: notify.onError('替换doyo标签错误 <%= error.message %>')}))
         .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
         .pipe(replace(removeDir, ''))
         .pipe(replace(doyoReg, '{include="$1"}'))

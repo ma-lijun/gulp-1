@@ -563,13 +563,6 @@ css@^2.0.0:
     source-map-resolve "^0.3.0"
     urix "^0.1.0"
 
-cssgrace@^3.0.0:
-  version "3.0.0"
-  resolved "http://registry.npm.taobao.org/cssgrace/download/cssgrace-3.0.0.tgz#4dd9b5cc849eb7404f80a9ab38640a1458c60332"
-  dependencies:
-    image-size "^0.3.5"
-    postcss "^5.0.11"
-
 cssnano@^3.0.0:
   version "3.8.0"
   resolved "http://registry.npm.taobao.org/cssnano/download/cssnano-3.8.0.tgz#bb90ac5292f42b679d9a05f6da0e9697556bb80d"
@@ -1268,14 +1261,6 @@ gulp-plumber@^1.1.0:
     gulp-util "^3"
     through2 "^2"
 
-gulp-postcss@^6.2.0:
-  version "6.2.0"
-  resolved "http://registry.npm.taobao.org/gulp-postcss/download/gulp-postcss-6.2.0.tgz#be0b7c3ab25aaa9a6ddef3fc65edf52d2be99640"
-  dependencies:
-    gulp-util "^3.0.7"
-    postcss "^5.2.0"
-    vinyl-sourcemaps-apply "^0.2.0"
-
 gulp-replace@^0.5.4:
   version "0.5.4"
   resolved "http://registry.npm.taobao.org/gulp-replace/download/gulp-replace-0.5.4.tgz#69a67914bbd13c562bff14f504a403796aa0daa9"
@@ -1413,10 +1398,6 @@ iconv-lite@0.4.11:
 iconv-lite@0.4.13:
   version "0.4.13"
   resolved "http://registry.npm.taobao.org/iconv-lite/download/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"
-
-image-size@^0.3.5:
-  version "0.3.5"
-  resolved "http://registry.npm.taobao.org/image-size/download/image-size-0.3.5.tgz#83240eab2fb5b00b04aab8c74b0471e9cba7ad8c"
 
 image-size@~0.5.0:
   version "0.5.0"
@@ -2602,7 +2583,7 @@ postcss-zindex@^2.0.1:
     postcss "^5.0.4"
     uniqs "^2.0.0"
 
-postcss@^5.0.10, postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0.14, postcss@^5.0.16, postcss@^5.0.2, postcss@^5.0.4, postcss@^5.0.5, postcss@^5.0.8, postcss@^5.2.0, postcss@^5.2.4:
+postcss@^5.0.10, postcss@^5.0.11, postcss@^5.0.12, postcss@^5.0.13, postcss@^5.0.14, postcss@^5.0.16, postcss@^5.0.2, postcss@^5.0.4, postcss@^5.0.5, postcss@^5.0.8, postcss@^5.2.4:
   version "5.2.5"
   resolved "http://registry.npm.taobao.org/postcss/download/postcss-5.2.5.tgz#ec428c27dffc7fac65961340a9b022fa4af5f056"
   dependencies:
