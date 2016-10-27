@@ -10,8 +10,7 @@ const root = "",                //项目目录
     serverIndex = "noindex.html",  //服务器默认打开页面（为了显示页面列表，设置noindex.html）
     serverHost = 'localhost';      //服务器地址
 
-const babelStatus = false,           //是否使用babel编译js
-    cssminify = true;              //css压缩
+const cssminify = true;              //css压缩
 
 //开发目录文件夹
 const buildDir = {
@@ -53,7 +52,6 @@ const gulp = require('gulp'),
     postcss = require('gulp-postcss'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify'),
-    babel = require('gulp-babel'),
     cssgrace = require('cssgrace');
 
 //默认任务
@@ -189,10 +187,6 @@ gulp.task('css', function () {
 
 gulp.task('js', function () {
     return gulp.src(asset.js + '/*.js')
-        .pipe(plumber({errorHandler: notify.onError("babel编译失败")}))
-        .pipe(gulpif(babelStatus, babel({
-            presets: ['es2015']
-        })))
         .pipe(gulp.dest(buildDir.js))
 });
 
