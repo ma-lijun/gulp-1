@@ -33,6 +33,8 @@ const asset = {
 
 // 模块调用
 const gulp = require('gulp'),
+    os = require('os'),
+    ip=require('ip'),
     open = require("open"),
     contact = require("gulp-concat"),
     gulpSequence = require('gulp-sequence'),
@@ -55,11 +57,11 @@ const gulp = require('gulp'),
     cssgrace = require('cssgrace');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open'));
+gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open','ip'));
 
-gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open'));
+gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open','ip'));
 
-gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact'));
+gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -71,7 +73,9 @@ gulp.task('connect', function () {
     })
 });
 
-
+gulp.task('ip',function(){
+    console.log('请在其他设备设备上访问:-----'+ip.address()+':'+serverPort)
+});
 gulp.task('open', function () {
     open("http://localhost:" + serverPort.toString());
 });
@@ -108,6 +112,10 @@ gulp.task('ejs', function () {
         .pipe(connect.reload())
 });
 
+gulp.task('copy-css',function(){
+   return gulp.src(asset.less+'*.css')
+       .pipe(gulp.dest(buildDir.css+'/'))
+});
 //编译less
 gulp.task('less', function () {
     return gulp.src(asset.less + '*.less')
@@ -156,11 +164,11 @@ gulp.task('cleantemp',function(){
     ]);
 });
 gulp.task('contact', function () {
-    gulpSequence('cleanless', ['less', 'stylus'], 'contactc', 'cleanless','cleantemp')()
+    gulpSequence('cleanless', ['less', 'stylus','copy-css'], 'contactc', 'cleanless','cleantemp')()
 });
 
 gulp.task('contact-dev', function () {
-    gulpSequence( ['less', 'stylus'], 'contactc','cleantemp')()
+    gulpSequence( ['less', 'stylus','copy-css'], 'contactc','cleantemp')()
 });
 //复制静态文件到build目录
 gulp.task('images', function () {
