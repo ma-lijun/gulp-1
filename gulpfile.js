@@ -49,6 +49,7 @@ const gulp = require('gulp'),
     less = require('gulp-less'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
+    sourcemaps=require('gulp-sourcemaps'),
     plumber = require('gulp-plumber'),
     notify = require('gulp-notify');
 
@@ -58,6 +59,8 @@ gulp.task('default', gulpSequence(['watch', 'ejs', 'js', 'css', 'images', 'fonts
 gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open','ip'));
 
 gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
+
+gulp.task('test', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev','ip'));
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -131,21 +134,24 @@ gulp.task('stylus', function () {
 gulp.task('contactc', function () {
     return gulp.src(buildDir.css + '/temp/*.css')
         .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
-        .pipe(contact('all.css'))
+        .pipe(sourcemaps.init())
         .pipe(autoprefixer({
             browsers: ['last 3 versions', 'IE 6-10', '>2%']
         }))
-        .pipe(gcmq())
+        .pipe(contact('all.css'))
         .pipe(gulpif(cssminify, cssnano({
             core: !1,
             discardComments: '!1'
         })))
+        .pipe(gcmq())
+        .pipe(sourcemaps.write(''))
         .pipe(gulp.dest(build + 'css/'))
         .pipe(connect.reload())
 });
 gulp.task('cleanless', function () {
     return del([
-        buildDir.css + '/less/'
+        buildDir.css + '/less/',
+        buildDir.css+'/all.css.map'
     ]);
 });
 gulp.task('cleantemp',function(){
@@ -153,8 +159,13 @@ gulp.task('cleantemp',function(){
         buildDir.css + '/temp/'
     ]);
 });
+gulp.task('cleanTemplate',function(){
+    return del([
+        build+'template/'
+    ])
+});
 gulp.task('contact', function () {
-    gulpSequence('cleanless', ['less', 'stylus','copy-css'], 'contactc', 'cleanless','cleantemp')()
+    gulpSequence('cleanless', ['less', 'stylus','copy-css'], 'contactc', 'cleanless','cleantemp','cleanTemplate')()
 });
 
 gulp.task('contact-dev', function () {
