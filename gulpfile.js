@@ -42,7 +42,6 @@ const gulp = require('gulp'),
     gcmq = require('gulp-group-css-media-queries'),
     del = require('del'),
     minify = require('gulp-minify'),
-    ejs = require('gulp-ejs'),
     dest = require('gulp-dest'),
     stylus = require('gulp-stylus'),
     connect = require('gulp-connect'),
@@ -51,6 +50,7 @@ const gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
     sourcemaps=require('gulp-sourcemaps'),
     plumber = require('gulp-plumber'),
+    te=require('gulp-te'),
     notify = require('gulp-notify');
 
 //默认任务
@@ -61,6 +61,7 @@ gulp.task('dev', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts
 gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
 
 gulp.task('test', gulpSequence(['watch-dev', 'ejs', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev','ip'));
+
 //服务器配置
 gulp.task('connect', function () {
     connect.server({
@@ -103,8 +104,7 @@ gulp.task('ejs', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
     return gulp.src(asset.html + '/**/*.html', {base: asset.html})
         .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
-        .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
-        .pipe(ejs())
+        .pipe(te())
         .pipe(gulp.dest(build))
         .pipe(connect.reload())
 });

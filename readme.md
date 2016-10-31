@@ -47,7 +47,27 @@ gulp
 + HTML 模板引入（ejs模板引擎，具体语法参照 [mde/ejs](https://github.com/mde/ejs)）
 
         {{header}} 默认后缀为html，目录为template
-       
+        
+     你也可以
+        
+        {{header(<jquery选择器>,<第几个>,<要加的类>)}}
+        
+     jquery选择器 默认值： li
+     
+     第几个  无默认值
+     
+     要加的类 默认：on
+        
+     比如
+        
+        {{header(.nav li,2,active)}}
+        
+     支持的缩写   
+        
+        {{header(.nav li,2)}}
+        
+        {{header(2)}}
+         
 + 浏览器前缀修复
 
     当前设置兼容性为 
