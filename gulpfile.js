@@ -1,7 +1,7 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp*/
 
-const root = "",                //项目目录
-
+const
+    root = "C:/Users/Administrator/Desktop/htmltest/",                //项目目录
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
 
@@ -53,13 +53,13 @@ const gulp = require('gulp'),
     notify = require('gulp-notify');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'te', 'js', 'css', 'images', 'fonts', 'connect'], 'contact', 'open','ip'));
+gulp.task('default', gulpSequence(['watch', 'te', 'js', 'css','css-less', 'images', 'fonts', 'connect'], 'contact', 'open','ip'));
 
-gulp.task('dev', gulpSequence(['watch-dev', 'te', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev', 'open','ip'));
+gulp.task('dev', gulpSequence(['watch-dev', 'te', 'js', 'css', 'css-less','images', 'fonts', 'connect'], 'contact-dev', 'open','ip'));
 
-gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
+gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template','css-less', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
 
-gulp.task('test', gulpSequence(['watch-dev', 'te', 'js', 'css', 'images', 'fonts', 'connect'], 'contact-dev','ip'));
+gulp.task('test', gulpSequence(['watch-dev', 'te', 'js', 'css', 'images','css-less', 'fonts', 'connect'], 'contact-dev','ip'));
 
 //服务器配置
 gulp.task('connect', function () {
@@ -81,12 +81,13 @@ gulp.task('open', function () {
 
 //监视文件
 gulp.task('watch', function () {
-    gulp.watch(asset.html + '/**/*.html', ['te']);
+    gulp.watch(asset.html + '**/*.html', ['te']);
     gulp.watch(asset.less + '*', ['contact']);
     gulp.watch(asset.css + '**/*', ['css']);
     gulp.watch(asset.images + '**/*', ['images']);
     gulp.watch(asset.js + '/*.js', ['js']);
-    gulp.watch(asset.fonts + '**/*', ['fonts'])
+    gulp.watch(asset.fonts + '**/*', ['fonts']);
+    gulp.watch(asset.css + '**/*.less', ['css-less']);
 });
 
 gulp.task('watch-dev', function () {
@@ -115,6 +116,15 @@ gulp.task('less', function () {
         .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
         .pipe(less())
         .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(connect.reload())
+});
+
+gulp.task('css-less',function(){
+    return gulp.src(asset.css+'*.less')
+        .pipe(changed(buildDir.css+'/less'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css ))
         .pipe(connect.reload())
 });
 
@@ -159,14 +169,14 @@ gulp.task('fonts', function () {
 });
 
 gulp.task('css', function () {
-    return gulp.src(asset.css + '**/*', {base: asset.css})
+    return gulp.src([asset.css + '**/*','!**/*.less'], {base: asset.css})
         .pipe(changed(buildDir.css))
         .pipe(gulp.dest(buildDir.css))
         .pipe(connect.reload())
 });
 
 gulp.task('js', function () {
-    return gulp.src(asset.js + '/*.js')
+    return gulp.src(asset.js + '**/*')
         .pipe(changed(buildDir.js))
         .pipe(gulp.dest(buildDir.js))
 });

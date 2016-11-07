@@ -1317,9 +1317,9 @@ gulp-sourcemaps@^2.2.0:
     through2 "2.X"
     vinyl "1.X"
 
-gulp-te@0.0.7:
-  version "0.0.7"
-  resolved "http://registry.npm.taobao.org/gulp-te/download/gulp-te-0.0.7.tgz#5681f7c76397397dd5e63de9f82f392efe8825ea"
+gulp-te@0.0.8:
+  version "0.0.8"
+  resolved "http://registry.npm.taobao.org/gulp-te/download/gulp-te-0.0.8.tgz#de41f4224933b35af8c43d329d281e92b9dbd2bf"
   dependencies:
     cheerio "^0.22.0"
     gulp-util "^3.0.7"
