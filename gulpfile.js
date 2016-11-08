@@ -1,7 +1,7 @@
 /*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp*/
 
 const
-    root = "C:/Users/Administrator/Desktop/htmltest/",                //项目目录
+    root = "",                //项目目录
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
 
