@@ -50,6 +50,7 @@ const gulp = require('gulp'),
     sourcemaps=require('gulp-sourcemaps'),
     plumber = require('gulp-plumber'),
     te=require('gulp-te'),
+    watch=require('gulp-watch'),
     notify = require('gulp-notify');
 
 //默认任务
@@ -81,32 +82,27 @@ gulp.task('open', function () {
 
 //监视文件
 gulp.task('watch', function () {
-    gulp.watch(asset.html + '**/*.html', ['te']);
-    gulp.watch(asset.less + '*', ['contact']);
     gulp.watch(asset.css + '**/*', ['css']);
-    gulp.watch(asset.images + '**/*', ['images']);
     gulp.watch(asset.js + '/*.js', ['js']);
-    gulp.watch(asset.fonts + '**/*', ['fonts']);
     gulp.watch(asset.css + '**/*.less', ['css-less']);
 });
 
 gulp.task('watch-dev', function () {
-    gulp.watch(asset.html + '/**/*.html', ['te']);
-    gulp.watch(asset.less + '*', ['contact-dev']);
     gulp.watch(asset.css + '**/*', ['css']);
-    gulp.watch(asset.images + '**/*', ['images']);
     gulp.watch(asset.js + '/*.js', ['js']);
-    gulp.watch(asset.fonts + '**/*', ['fonts'])
+    gulp.watch(asset.css + '**/*.less', ['css-less']);
 });
 
 //编译te
 gulp.task('te', function () {
-    var Reg = /{{\s*([^\s]*)\s*}}/g;
-    return gulp.src(asset.html + '/**/*.html', {base: asset.html})
-        .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
-        .pipe(te())
-        .pipe(gulp.dest(build))
-        .pipe(connect.reload())
+    return watch((asset.html + '**/*.html'),function(){
+        var Reg = /{{\s*([^\s]*)\s*}}/g;
+        gulp.src(asset.html + '/**/*.html', {base: asset.html})
+            .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
+            .pipe(te())
+            .pipe(gulp.dest(build))
+            .pipe(connect.reload())
+    })
 });
 
 //编译less
@@ -130,22 +126,25 @@ gulp.task('css-less',function(){
 
 
 gulp.task('contactc', function () {
-    return gulp.src(asset.less+'*.less')
-        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
-        .pipe(sourcemaps.init())
-        .pipe(less())
-        .pipe(autoprefixer({
-            browsers: ['last 3 versions', 'IE 6-10', '>2%']
-        }))
-        .pipe(contact('all.css'))
-        .pipe(gulpif(cssminify, cssnano({
-            core: !1,
-            discardComments: '!1'
-        })))
-        .pipe(gcmq())
-        .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
-        .pipe(gulp.dest(build + 'css/'))
-        .pipe(connect.reload())
+    return watch((asset.less+'*.less'),function(){
+        gulp.src(asset.less+'*.less')
+            .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
+            .pipe(sourcemaps.init())
+            .pipe(less())
+            .pipe(autoprefixer({
+                browsers: ['last 3 versions', 'IE 6-10', '>2%']
+            }))
+            .pipe(contact('all.css'))
+            .pipe(gulpif(cssminify, cssnano({
+                core: !1,
+                discardComments: '!1'
+            })))
+            .pipe(gcmq())
+            .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
+            .pipe(gulp.dest(build + 'css/'))
+            .pipe(connect.reload())
+    })
+
 });
 
 gulp.task('contact', function () {
@@ -157,15 +156,19 @@ gulp.task('contact-dev', ['less','contactc']);
 
 //复制静态文件到build目录
 gulp.task('images', function () {
-    return gulp.src(asset.images + '**/*', {base: asset.images})
-        .pipe(changed(buildDir.images))
-        .pipe(gulp.dest(buildDir.images))
+    return  watch((asset.images+ '**/*'),function(){
+        gulp.src(asset.images + '**/*', {base: asset.images})
+            .pipe(changed(buildDir.images))
+            .pipe(gulp.dest(buildDir.images))
+    });
 });
 
 gulp.task('fonts', function () {
-    return gulp.src(asset.fonts + '**/*', {base: asset.fonts})
-        .pipe(changed(buildDir.fonts))
-        .pipe(gulp.dest(buildDir.fonts))
+    return watch((asset.fonts + '**/*'),function(){
+        gulp.src(asset.fonts + '**/*', {base: asset.fonts})
+            .pipe(changed(buildDir.fonts))
+            .pipe(gulp.dest(buildDir.fonts))
+    })
 });
 
 gulp.task('css', function () {
@@ -197,8 +200,8 @@ gulp.task('del', function () {
 });
 
 gulp.task('copy-template',function(){
-   return gulp.src(asset.html+'/template/*.html')
-       .pipe(gulp.dest(build+'template/'))
+    return gulp.src(asset.html+'/template/*.html')
+        .pipe(gulp.dest(build+'template/'))
 });
 gulp.task('doyo-html', function () {
     var Reg = /{{\s*([^\s]*)\s*}}/g;
