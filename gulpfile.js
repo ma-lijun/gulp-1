@@ -90,7 +90,14 @@ gulp.task('watch', function () {
 
 //编译te
 gulp.task('te', function () {
-    return watch([asset.html + '**/*.html','!'+asset.html+'template/**/*.html'],{ ignoreInitial: false },function(){
+
+    gulp.src(asset.html + '/**/*.html', {base: asset.html})
+        .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
+        .pipe(te())
+        .pipe(gulp.dest(build))
+        .pipe(connect.reload())
+
+    return watch([asset.html + '**/*.html','!'+asset.html+'template/**/*.html'],function(){
         gulp.src(asset.html + '/**/*.html', {base: asset.html})
             .pipe(changed(build))
             .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
@@ -104,7 +111,14 @@ gulp.task('te', function () {
 });
 
 gulp.task('te-all', function () {
-    return watch(asset.html + 'template/**/*.html',{ ignoreInitial: false },function(){
+
+    gulp.src(asset.html + '/**/*.html', {base: asset.html})
+        .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
+        .pipe(te())
+        .pipe(gulp.dest(build))
+        .pipe(connect.reload())
+
+    return watch(asset.html + 'template/**/*.html',function(){
         gulp.src(asset.html + '/**/*.html', {base: asset.html})
             .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
             .pipe(te())
@@ -136,7 +150,25 @@ gulp.task('css-less',function(){
 
 
 gulp.task('contactc', function () {
-    return watch(asset.less+'*.less',{ ignoreInitial: false },function(){
+
+    gulp.src(asset.less+'*.less')
+        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
+        .pipe(sourcemaps.init())
+        .pipe(less())
+        .pipe(autoprefixer({
+            browsers: ['last 3 versions', 'IE 6-10', '>2%']
+        }))
+        .pipe(contact('all.css'))
+        .pipe(gulpif(cssminify, cssnano({
+            core: !1,
+            discardComments: '!1'
+        })))
+        .pipe(gcmq())
+        .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
+        .pipe(gulp.dest(build + 'css/'))
+        .pipe(connect.reload())
+
+    return watch(asset.less+'*.less',function(){
         gulp.src(asset.less+'*.less')
             .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
             .pipe(sourcemaps.init())
@@ -165,7 +197,12 @@ gulp.task('contact-dev', ['less','contactc']);
 
 //复制静态文件到build目录
 gulp.task('images', function () {
-    return  watch(asset.images+ '**/*',{ ignoreInitial: false },function(){
+
+    gulp.src(asset.images + '**/*', {base: asset.images})
+        .pipe(changed(buildDir.images))
+        .pipe(gulp.dest(buildDir.images))
+
+    return  watch(asset.images+ '**/*',function(){
         gulp.src(asset.images + '**/*', {base: asset.images})
             .pipe(changed(buildDir.images))
             .pipe(gulp.dest(buildDir.images))
@@ -175,7 +212,12 @@ gulp.task('images', function () {
 });
 
 gulp.task('fonts', function () {
-    return watch(asset.fonts + '**/*',{ ignoreInitial: false },function(){
+
+    gulp.src(asset.fonts + '**/*', {base: asset.fonts})
+        .pipe(changed(buildDir.fonts))
+        .pipe(gulp.dest(buildDir.fonts))
+
+    return watch(asset.fonts + '**/*',function(){
         gulp.src(asset.fonts + '**/*', {base: asset.fonts})
             .pipe(changed(buildDir.fonts))
             .pipe(gulp.dest(buildDir.fonts))
