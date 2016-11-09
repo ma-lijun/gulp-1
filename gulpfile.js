@@ -54,13 +54,13 @@ const gulp = require('gulp'),
     notify = require('gulp-notify');
 
 //默认任务
-gulp.task('default', gulpSequence(['watch', 'te', 'js', 'css','css-less', 'images', 'fonts', 'connect'], 'contact', 'open','ip'));
+gulp.task('default', ['watch', 'te', 'js', 'css','css-less', 'images', 'fonts', 'connect', 'contact', 'open','ip']);
 
-gulp.task('dev', gulpSequence(['watch-dev', 'te', 'js', 'css', 'css-less','images', 'fonts', 'connect'], 'contact-dev', 'open','ip'));
+gulp.task('dev', ['watch-dev', 'te', 'js', 'css', 'css-less','images', 'fonts', 'connect', 'contact-dev', 'open','ip']);
 
-gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template','css-less', 'js', 'css', 'images', 'fonts'], 'contact','ip'));
+gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template','css-less', 'js', 'css', 'images', 'fonts', 'contact','ip']));
 
-gulp.task('test', gulpSequence(['watch-dev', 'te', 'js', 'css', 'images','css-less', 'fonts', 'connect'], 'contact-dev','ip'));
+gulp.task('test', ['watch-dev', 'te', 'js', 'css', 'images','css-less', 'fonts', 'connect', 'contact-dev','ip']);
 
 //服务器配置
 gulp.task('connect', function () {
