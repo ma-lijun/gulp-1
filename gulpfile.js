@@ -151,17 +151,19 @@ gulp.task('css-less',function(){
 
 gulp.task('contactc', function () {
 
+    var reg=/\/\/(.*)/g;
     gulp.src(asset.less+'*.less')
         .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
         .pipe(sourcemaps.init())
+        .pipe(replace(reg,'/*$1*/'))
         .pipe(less())
         .pipe(autoprefixer({
             browsers: ['last 3 versions', 'IE 6-10', '>2%']
         }))
         .pipe(contact('all.css'))
         .pipe(gulpif(cssminify, cssnano({
-            core: !1,
-            discardComments: '!1'
+            discardComments: !1,
+            discardUnused:!1
         })))
         .pipe(gcmq())
         .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
@@ -172,14 +174,15 @@ gulp.task('contactc', function () {
         gulp.src(asset.less+'*.less')
             .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
             .pipe(sourcemaps.init())
+            .pipe(replace(reg,'/*$1*/'))
             .pipe(less())
             .pipe(autoprefixer({
                 browsers: ['last 3 versions', 'IE 6-10', '>2%']
             }))
             .pipe(contact('all.css'))
             .pipe(gulpif(cssminify, cssnano({
-                core: !1,
-                discardComments: '!1'
+                discardComments: !1,
+                discardUnused:!1
             })))
             .pipe(gcmq())
             .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
