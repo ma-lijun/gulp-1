@@ -44,7 +44,7 @@ gulp
 
 ## **4.实现的功能**
 
-+ HTML 模板引入（ejs模板引擎，具体语法参照 [mde/ejs](https://github.com/mde/ejs)）
++ HTML 模板引入（使用gulp-te模板引入）
 
         {{header}} 默认后缀为html，目录为template
         
@@ -72,25 +72,16 @@ gulp
 
     当前设置兼容性为 
 
-        browsers: ['last 5 versions', 'IE 6-8', '>2%']
+        browsers: ['last 5 versions','>2%']
         
         
-+ 编译并合并www/less文件夹下的less文件和stylus文件,里面的css文件现在也会被合并，但是不建议使用css
++ 编译并合并www/less文件夹下的less文件
 
-  + 你可以浏览下面网站学习less或stylus。
+  + 你可以浏览下面网站学习less语法
   
        + [LESS](http://less.bootcss.com/#)  LESS 将 CSS 赋予了动态语言的特性，如 变量， 继承， 运算， 函数. 
   
-       + [Stylus](http://stylus-lang.com/) EXPRESSIVE, DYNAMIC, ROBUST CSS
-  
-  + 由于sass、scss安装难度的问题 没有加入支持，如果你需要此功能，可以在本页面上方Pull requests。
-
-    
 + css优化（cssnano）
-
-
-+ es2015 语法 babel自动编译，默认关闭
-
 
 ## **5.目录结构**
 ![iamge](md/i2.png)
@@ -102,9 +93,9 @@ gulp
 
         gulp
  
-+ 最终发布，将会清理html和css模板文件,并且压缩css，js  
++ 开发模式，将会清理html和css模板文件,并且压缩css  
 
-        gulp dist
+        gulp dev
     
 + doyo发布
 
@@ -122,13 +113,13 @@ gulp
         
 + webstorm   
 
-        默认支持less，stylus可以下载插件支持，webstorm里可以直接运行gulp任务
+        默认支持less,，webstorm里可以直接运行gulp任务
 
 ![iamge](md/i3.png)
     
 + sublime   
  
-        less，stylus都需要安装插件以支持语法高亮(请自行百度)
+        less需要安装插件以支持语法高亮(请自行百度)
 
 
 
