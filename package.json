@@ -1,6 +1,6 @@
 {
   "name": "gulp",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "description": "gulp task",
   "main": "gulpfile.js",
   "directories": {

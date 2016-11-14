@@ -1,39 +1,32 @@
-/*** Created by Doveaz on 2016/9/24.  https://github.com/DoveAz/gulp*/
-
-const
-    root = "",                //项目目录
+/**
+ * Created by Administrator on 2016/11/11.
+ */
+const root = "",                //项目目录
     build = root + 'build/',       //开发目录
     src = root + 'www/',           //源文件
+    cssminify = true,           //css压缩
+    regLessCommit = /\/\/(.*)/g,
+    regDoyo = /{{\s*([^\s]*)\s*}}/g,
+    serverPort = '800',
+    buildDir = {
+        css: build + 'css',
+        images: build + 'images',
+        js: build + 'js',
+        fonts: build + 'fonts'
+    },
+    asset = {
+        html: src,
+        less: src + 'less/',
+        copy: ['images', 'fonts', 'css', 'js']
+    }
+var lessCommentToCssComment = 0,
+    autofix = 0,
+    concatMediaQuery = 0
 
-    serverRoot = build,            //服务器根目录
-    serverPort = '800',             //服务器端口
-    serverIndex = "noindex.html",  //服务器默认打开页面（为了显示页面列表，设置noindex.html）
-    serverHost = 'localhost';      //服务器地址
-
-const cssminify = true;              //css压缩
-
-//开发目录文件夹
-const buildDir = {
-    css: build + 'css',
-    images: build + 'images',
-    js: build + 'js',
-    fonts: build + 'fonts'
-};
-
-//静态文件目录
-const asset = {
-    html: src,
-    js: src + 'js/',
-    css: src + 'css/',
-    less: src + 'less/',
-    images: src + "images/",
-    fonts: src + "fonts/"
-};
 
 // 模块调用
 const gulp = require('gulp'),
-    os = require('os'),
-    ip=require('ip'),
+    ip = require('ip'),
     open = require("open"),
     contact = require("gulp-concat"),
     gulpSequence = require('gulp-sequence'),
@@ -47,228 +40,221 @@ const gulp = require('gulp'),
     less = require('gulp-less'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
-    sourcemaps=require('gulp-sourcemaps'),
+    sourcemaps = require('gulp-sourcemaps'),
     plumber = require('gulp-plumber'),
-    te=require('gulp-te'),
-    watch=require('gulp-watch'),
-    notify = require('gulp-notify');
+    te = require('gulp-te'),
+    watch = require('gulp-watch'),
+    path = require('path'),
+    notify = require('gulp-notify')
 
-//默认任务
-gulp.task('default', ['watch', 'te','te-all', 'js', 'css','css-less', 'images', 'fonts', 'connect', 'contact', 'open','ip']);
-
-gulp.task('dev', ['watch', 'te','te-all', 'js', 'css', 'css-less','images', 'fonts', 'connect', 'contact-dev', 'open','ip']);
-
-gulp.task('doyo', gulpSequence(['del'], ['doyo-html','copy-template','css-less', 'js', 'css', 'images', 'fonts', 'contact','ip']));
-
-gulp.task('test', ['watch', 'te','te-all', 'js', 'css', 'images','css-less', 'fonts', 'connect', 'contact-dev','ip']);
-
-//服务器配置
 gulp.task('connect', function () {
     connect.server({
         port: serverPort,
-        host: serverHost,
-        root: serverRoot,
+        host: 'localhost',
+        root: build,
         livereload: true,
-        index: serverIndex
+        index: 'noindex.html'
     })
-});
+})
+gulp.task('default', gulpSequence('defaultInit', ['clean', 'fix']))
+gulp.task('dev', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init', 'ipAndOpen']))
+gulp.task('test', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init']))
 
-gulp.task('ip',function(){
-    console.log('请在其他设备设备上访问:-----'+ip.address()+':'+serverPort)
-});
-gulp.task('open', function () {
-    open("http://localhost:" + serverPort.toString());
-});
+//初始化
+gulp.task('init', function () {
+    asset.copy.map(function (e) {
+        gulp.src(path.join(src, e, '**/*'), {base: path.join(src, e)})
+            .pipe(gulp.dest(path.join(build, e)))
+    })
 
-//监视文件
-gulp.task('watch', function () {
-    gulp.watch(asset.css + '**/*', ['css']);
-    gulp.watch(asset.js + '/*.js', ['js']);
-    gulp.watch(asset.css + '**/*.less', ['css-less']);
-});
+    gulp.src(path.join(src, 'css/**/*.less'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(replace(regLessCommit, '/*$1*/'))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css))
 
-
-//编译te
-gulp.task('te', function () {
-
-    gulp.src(asset.html + '/**/*.html', {base: asset.html})
+    gulp.src(path.join(src, '/**/*.html'), {base: src})
         .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
         .pipe(te())
         .pipe(gulp.dest(build))
-        .pipe(connect.reload())
 
-    return watch([asset.html + '**/*.html','!'+asset.html+'template/**/*.html'],function(){
+    del(path.join(buildDir.css, 'less'))
+
+    return lessAndConcat()
+})
+
+//监视文件
+gulp.task('initWatch', function () {
+    asset.copy.map(function (e) {
+        if (e != 'css') {
+            watch(path.join(src, e, '**/*'), {base: path.join(src, e)}, function () {
+                gulp.src(path.join(src, e, '**/*'))
+                    .pipe(changed(build + e))
+                    .pipe(plumber({errorHandler: notify.onError("<%= error.message %>")}))
+                    .pipe(gulp.dest(build + e))
+                    .pipe(connect.reload())
+            }).on('unlink', function (path) {
+                del(path.replace('www', 'build'))
+            })
+        }
+    })
+})
+gulp.task('watchHtml', function () {
+    return watch([asset.html + '**/*.html', '!' + asset.html + 'template/**/*.html'], function () {
         gulp.src(asset.html + '/**/*.html', {base: asset.html})
             .pipe(changed(build))
             .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
             .pipe(te())
             .pipe(gulp.dest(build))
             .pipe(connect.reload())
-    }).on('unlink',function(path){
-        del(path.replace('www','build'))
+    }).on('unlink', function (path) {
+        del(path.replace('www', 'build'))
     });
-
-});
-
-gulp.task('te-all', function () {
-
-    gulp.src(asset.html + '/**/*.html', {base: asset.html})
-        .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
-        .pipe(te())
-        .pipe(gulp.dest(build))
-        .pipe(connect.reload())
-
-    return watch(asset.html + 'template/**/*.html',function(){
+})
+gulp.task('watchTemplate', function () {
+    return watch(asset.html + 'template/**/*.html', function () {
         gulp.src(asset.html + '/**/*.html', {base: asset.html})
             .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
             .pipe(te())
             .pipe(gulp.dest(build))
             .pipe(connect.reload())
-    }).on('unlink',function(path){
-        del(path.replace('www','build'))
+    }).on('unlink', function (path) {
+        del(path.replace('www', 'build'))
     });
-});
+})
+gulp.task('watchLess', function () {
+    return watch(asset.less + '*.less', function () {
+        lessAndConcat()
+    }).on('unlink', function (path) {
+        del(path.replace('www\\less', 'build\\css\\less').replace('.less', '.css'))
+    })
+})
+gulp.task('watchCss', function () {
+    const cssPath = path.join(src, 'css')
+    return watch([cssPath + '/**/', '!' + cssPath + '/*.less'], function () {
+        gulp.src([cssPath + '/**/*', '!/**/*.less'], {base: cssPath})
+            .pipe(changed(buildDir.css))
+            .pipe(plumber({errorHandler: notify.onError("<%= error.message %>")}))
+            .pipe(gulp.dest(buildDir.css))
+            .pipe(connect.reload())
+    }).on('unlink', function (path) {
+        del(path.replace('www', 'build'))
+    })
+})
+gulp.task('watchLessInCssDir', function () {
+    const lessPath = path.join(src, 'css/**/*.less')
+    return watch(lessPath, function () {
+        gulp.src(lessPath)
+            .pipe(changed(buildDir.css), {extension: '.css'})
+            .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+            .pipe(less())
+            .pipe(gulp.dest(buildDir.css))
+            .pipe(connect.reload())
+    }).on('unlink', function (path) {
+        del(path.replace('www', 'build').replace('.less', '.css'))
+    })
+})
+gulp.task('clean', function () {
+    setTimeout(function () {
+        del(
+            [
+                build + 'template/',
+                buildDir.css + '/less/',
+                buildDir.css + '/all.css.map'
+            ]
+        )
+    }, 3000)
 
-//编译less
-gulp.task('less', function () {
-    return gulp.src(asset.less + '*.less')
-        .pipe(changed(buildDir.css+'/less'))
-        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
-        .pipe(less())
-        .pipe(gulp.dest(buildDir.css + '/less'))
-        .pipe(connect.reload())
-});
-
-gulp.task('css-less',function(){
-    return gulp.src(asset.css+'*.less')
-        .pipe(changed(buildDir.css+'/less'))
-        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
-        .pipe(less())
-        .pipe(gulp.dest(buildDir.css ))
-        .pipe(connect.reload())
-});
-
-
-gulp.task('contactc', function () {
-
-    var reg=/\/\/(.*)/g;
-    gulp.src(asset.less+'*.less')
-        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
-        .pipe(sourcemaps.init())
-        .pipe(replace(reg,'/*$1*/'))
-        .pipe(less())
-        .pipe(autoprefixer({
-            browsers: ['last 3 versions', 'IE 6-10', '>2%']
-        }))
-        .pipe(contact('all.css'))
+})
+gulp.task('fix', function () {
+    return gulp.src(path.join(buildDir.css, 'all.css'))
+        .pipe(gcmq())
         .pipe(gulpif(cssminify, cssnano({
             discardComments: !1,
-            discardUnused:!1
+            discardUnused: !1
         })))
-        .pipe(gcmq())
-        .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
+})
+
+gulp.task('defaultInit', function () {
+    lessCommentToCssComment = 1
+    autofix = 1
+    concatMediaQuery = 1
+    return gulp.start('init')
+})
+
+function lessAndConcat() {
+    return gulpSequence('less', 'concat')()
+}
+
+gulp.task('less', function () {
+    return gulp.src(path.join(src, 'less/**/*.less'))
+        .pipe(changed(buildDir.css + '/less', {extension: '.css'}))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css + '/less'))
+})
+gulp.task('concat', function () {
+    return gulp.src(build + 'css/less/*.css')
+        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
+        .pipe(sourcemaps.init())
+        .pipe(gulpif(autofix, autoprefixer({
+            browsers: ['last 5 versions', '>2%']
+        })))
+        .pipe(contact('all.css'))
+        .pipe(gulpif(concatMediaQuery, gcmq()))
+        .pipe(sourcemaps.write('', {sourceRoot: "./less"}))
         .pipe(gulp.dest(build + 'css/'))
         .pipe(connect.reload())
+})
+gulp.task('ipAndOpen', function () {
+    console.log('请在其他设备设备上访问:-----' + ip.address() + ':' + serverPort)
+    open("http://localhost:" + serverPort.toString())
+})
 
-    return watch(asset.less+'*.less',function(){
-        gulp.src(asset.less+'*.less')
-            .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
-            .pipe(sourcemaps.init())
-            .pipe(replace(reg,'/*$1*/'))
-            .pipe(less())
-            .pipe(autoprefixer({
-                browsers: ['last 3 versions', 'IE 6-10', '>2%']
-            }))
-            .pipe(contact('all.css'))
-            .pipe(gulpif(cssminify, cssnano({
-                discardComments: !1,
-                discardUnused:!1
-            })))
-            .pipe(gcmq())
-            .pipe(sourcemaps.write('',{sourceRoot:"./less"}))
-            .pipe(gulp.dest(build + 'css/'))
-            .pipe(connect.reload())
+
+gulp.task('doyo', function () {
+    asset.copy.map(function (e) {
+        gulp.src(path.join(src, e, '**/*'), {base: path.join(src, e)})
+            .pipe(gulp.dest(path.join(build, e)))
     })
-});
 
-gulp.task('contact', function () {
-    gulpSequence('contactc','clean')()
-});
-gulp.task('contact-dev', ['less','contactc']);
-
-
-
-//复制静态文件到build目录
-gulp.task('images', function () {
-
-    gulp.src(asset.images + '**/*', {base: asset.images})
-        .pipe(changed(buildDir.images))
-        .pipe(gulp.dest(buildDir.images))
-
-    return  watch(asset.images+ '**/*',function(){
-        gulp.src(asset.images + '**/*', {base: asset.images})
-            .pipe(changed(buildDir.images))
-            .pipe(gulp.dest(buildDir.images))
-    }).on('unlink',function(path){
-        del(path.replace('www','build'))
-    });
-});
-
-gulp.task('fonts', function () {
-
-    gulp.src(asset.fonts + '**/*', {base: asset.fonts})
-        .pipe(changed(buildDir.fonts))
-        .pipe(gulp.dest(buildDir.fonts))
-
-    return watch(asset.fonts + '**/*',function(){
-        gulp.src(asset.fonts + '**/*', {base: asset.fonts})
-            .pipe(changed(buildDir.fonts))
-            .pipe(gulp.dest(buildDir.fonts))
-    }).on('unlink',function(path){
-        del(path.replace('www','build'))
-    })
-});
-
-gulp.task('css', function () {
-    return gulp.src([asset.css + '**/*','!**/*.less'], {base: asset.css})
-        .pipe(changed(buildDir.css))
+    gulp.src(path.join(src, 'css/**/*.less'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(replace(regLessCommit, '/*$1*/'))
+        .pipe(less())
         .pipe(gulp.dest(buildDir.css))
-        .pipe(connect.reload())
-});
 
-gulp.task('js', function () {
-    return gulp.src(asset.js + '**/*')
-        .pipe(changed(buildDir.js))
-        .pipe(gulp.dest(buildDir.js))
-});
-
-//清理template文件
-gulp.task('clean', function () {
-    return del([
-        build + 'template/',
-        buildDir.css + '/less/',
-        buildDir.css+'/all.css.map'
-    ]);
-});
-
-gulp.task('del', function () {
-    return del([
-        build
-    ])
-});
-
-gulp.task('copy-template',function(){
-    return gulp.src(asset.html+'/template/*.html')
-        .pipe(gulp.dest(build+'template/'))
-});
-gulp.task('doyo-html', function () {
-    var Reg = /{{\s*([^\s]*)\s*}}/g;
-    var removeDir = /template\//g;
-    var doyoReg = /\<\%\-\s+include\(\'(.*)\'\)\s+\-?\%\>/g;
-    return gulp.src(asset.html + '*.html')
-        .pipe(plumber({errorHandler: notify.onError('替换doyo标签错误 <%= error.message %>')}))
-        .pipe(replace(Reg, "<%- include('template/$1.html') -%>"))
-        .pipe(replace(removeDir, ''))
-        .pipe(replace(doyoReg, '{include="$1"}'))
+    gulp.src(path.join(src, '/**/*.html'), {base: src})
+        .pipe(replace(regDoyo, '{include="$1.html"}'))
         .pipe(gulp.dest(build))
-});
+
+    gulp.src(asset.html + '/template/*.html')
+        .pipe(gulp.dest(build + 'template/'))
+
+    lessAndConcat()
+
+    setTimeout(function () {
+        del(
+            [
+                buildDir.css + '/less/',
+                buildDir.css + '/all.css.map'
+            ]
+        )
+    }, 3000)
+})
+
+gulp.task('watchServer',function(){
+    connect.server({
+        port: serverPort,
+        host: 'localhost',
+        root: 'www',
+        livereload: true,
+        index: 'noindex.html'
+    })
+})
+gulp.task('watch',['watchServer'],function () {
+    return watch('www/**/*')
+        .pipe(connect.reload())
+})
+
