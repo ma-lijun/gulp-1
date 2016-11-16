@@ -19,7 +19,7 @@ const root = "",                //项目目录
         less: src + 'less/',
         copy: ['images', 'fonts', 'css', 'js']
     }
-var lessCommentToCssComment = 0,
+let lessCommentToCssComment = 0,
     autofix = 0,
     concatMediaQuery = 0
 
@@ -45,6 +45,9 @@ const gulp = require('gulp'),
     te = require('gulp-te'),
     watch = require('gulp-watch'),
     path = require('path'),
+    remember = require('gulp-remember'),
+    cache=require('gulp-cached')
+
     notify = require('gulp-notify')
 
 gulp.task('connect', function () {
@@ -80,7 +83,22 @@ gulp.task('init', function () {
 
     del(path.join(buildDir.css, 'less'))
 
-    return lessAndConcat()
+    return gulp.src(path.join(src, 'less/**/*.less'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(sourcemaps.init())
+        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(gulpif(autofix, autoprefixer({
+            browsers: ['last 5 versions', '>2%']
+        })))
+        .pipe(contact('all.css'))
+        .pipe(gulpif(concatMediaQuery, gcmq()))
+        .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
+        .pipe(gulp.dest(build + 'css/'))
+        .pipe(connect.reload())
+
+
 })
 
 //监视文件
@@ -124,10 +142,28 @@ gulp.task('watchTemplate', function () {
 })
 gulp.task('watchLess', function () {
     return watch(asset.less + '*.less', function () {
-        lessAndConcat()
+       gulp.start('zz')
     }).on('unlink', function (path) {
         del(path.replace('www\\less', 'build\\css\\less').replace('.less', '.css'))
     })
+})
+gulp.task('zz',function(){
+    return gulp.src(path.join(src, 'less/**/*.less'))
+        .pipe(sourcemaps.init())
+        .pipe(cache('watchLess'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(remember('watchLess'))
+        .pipe(gulpif(autofix, autoprefixer({
+            browsers: ['last 5 versions', '>2%']
+        })))
+        .pipe(contact('all.css'))
+        .pipe(gulpif(concatMediaQuery, gcmq()))
+        .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
+        .pipe(gulp.dest(build + 'css/'))
+        .pipe(connect.reload())
 })
 gulp.task('watchCss', function () {
     const cssPath = path.join(src, 'css')
@@ -182,31 +218,8 @@ gulp.task('defaultInit', function () {
     return gulp.start('init')
 })
 
-function lessAndConcat() {
-    return gulpSequence('less', 'concat')()
-}
 
-gulp.task('less', function () {
-    return gulp.src(path.join(src, 'less/**/*.less'))
-        .pipe(changed(buildDir.css + '/less', {extension: '.css'}))
-        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
-        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
-        .pipe(less())
-        .pipe(gulp.dest(buildDir.css + '/less'))
-})
-gulp.task('concat', function () {
-    return gulp.src(build + 'css/less/*.css')
-        .pipe(plumber({errorHandler: notify.onError("css合并错误 <%= error.message %>")}))
-        .pipe(sourcemaps.init())
-        .pipe(gulpif(autofix, autoprefixer({
-            browsers: ['last 5 versions', '>2%']
-        })))
-        .pipe(contact('all.css'))
-        .pipe(gulpif(concatMediaQuery, gcmq()))
-        .pipe(sourcemaps.write('', {sourceRoot: "./less"}))
-        .pipe(gulp.dest(build + 'css/'))
-        .pipe(connect.reload())
-})
+
 gulp.task('ipAndOpen', function () {
     console.log('请在其他设备设备上访问:-----' + ip.address() + ':' + serverPort)
     open("http://localhost:" + serverPort.toString())
