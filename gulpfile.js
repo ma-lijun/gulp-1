@@ -97,8 +97,6 @@ gulp.task('init', function () {
         .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
         .pipe(gulp.dest(build + 'css/'))
         .pipe(connect.reload())
-
-
 })
 
 //监视文件
@@ -142,29 +140,27 @@ gulp.task('watchTemplate', function () {
 })
 gulp.task('watchLess', function () {
     return watch(asset.less + '*.less', function () {
-       gulp.start('zz')
+        gulp.src(path.join(src, 'less/**/*.less'))
+            .pipe(sourcemaps.init())
+            .pipe(cache('watchLess'))
+            .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+            .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
+            .pipe(less())
+            .pipe(gulp.dest(buildDir.css + '/less'))
+            .pipe(remember('watchLess'))
+            .pipe(gulpif(autofix, autoprefixer({
+                browsers: ['last 5 versions', '>2%']
+            })))
+            .pipe(contact('all.css'))
+            .pipe(gulpif(concatMediaQuery, gcmq()))
+            .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
+            .pipe(gulp.dest(build + 'css/'))
+            .pipe(connect.reload())
     }).on('unlink', function (path) {
         del(path.replace('www\\less', 'build\\css\\less').replace('.less', '.css'))
     })
 })
-gulp.task('zz',function(){
-    return gulp.src(path.join(src, 'less/**/*.less'))
-        .pipe(sourcemaps.init())
-        .pipe(cache('watchLess'))
-        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
-        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
-        .pipe(less())
-        .pipe(gulp.dest(buildDir.css + '/less'))
-        .pipe(remember('watchLess'))
-        .pipe(gulpif(autofix, autoprefixer({
-            browsers: ['last 5 versions', '>2%']
-        })))
-        .pipe(contact('all.css'))
-        .pipe(gulpif(concatMediaQuery, gcmq()))
-        .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
-        .pipe(gulp.dest(build + 'css/'))
-        .pipe(connect.reload())
-})
+
 gulp.task('watchCss', function () {
     const cssPath = path.join(src, 'css')
     return watch([cssPath + '/**/', '!' + cssPath + '/*.less'], function () {
@@ -177,6 +173,7 @@ gulp.task('watchCss', function () {
         del(path.replace('www', 'build'))
     })
 })
+
 gulp.task('watchLessInCssDir', function () {
     const lessPath = path.join(src, 'css/**/*.less')
     return watch(lessPath, function () {
@@ -190,6 +187,7 @@ gulp.task('watchLessInCssDir', function () {
         del(path.replace('www', 'build').replace('.less', '.css'))
     })
 })
+
 gulp.task('clean', function () {
     setTimeout(function () {
         del(
@@ -202,6 +200,7 @@ gulp.task('clean', function () {
     }, 3000)
 
 })
+
 gulp.task('fix', function () {
     return gulp.src(path.join(buildDir.css, 'all.css'))
         .pipe(gcmq())
@@ -218,13 +217,10 @@ gulp.task('defaultInit', function () {
     return gulp.start('init')
 })
 
-
-
 gulp.task('ipAndOpen', function () {
     console.log('请在其他设备设备上访问:-----' + ip.address() + ':' + serverPort)
-    open("http://localhost:" + serverPort.toString())
+    open("http://"+ip.address() +":"+ serverPort.toString())
 })
-
 
 gulp.task('doyo', function () {
     asset.copy.map(function (e) {
@@ -245,7 +241,20 @@ gulp.task('doyo', function () {
     gulp.src(asset.html + '/template/*.html')
         .pipe(gulp.dest(build + 'template/'))
 
-    lessAndConcat()
+    gulp.src(path.join(src, 'less/**/*.less'))
+        .pipe(plumber({errorHandler: notify.onError("less编译错误<%= error.message %>")}))
+        .pipe(sourcemaps.init())
+        .pipe(gulpif(lessCommentToCssComment, replace(regLessCommit, '/*$1*/')))
+        .pipe(less())
+        .pipe(gulp.dest(buildDir.css + '/less'))
+        .pipe(gulpif(autofix, autoprefixer({
+            browsers: ['last 5 versions', '>2%']
+        })))
+        .pipe(contact('all.css'))
+        .pipe(gulpif(concatMediaQuery, gcmq()))
+        .pipe(sourcemaps.write('', {sourceRoot: "../../www/less"}))
+        .pipe(gulp.dest(build + 'css/'))
+        .pipe(connect.reload())
 
     setTimeout(function () {
         del(
