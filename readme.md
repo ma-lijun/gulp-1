@@ -68,7 +68,7 @@ gulp
         
         {{header(2)}}
          
-+ 浏览器前缀修复
++ 浏览器前缀修复，事实上你不应该再写浏览器前缀了（除了-webkit-line-clamp），既然可以自动添加，又何必多次一举呢
 
     当前设置兼容性为 
 
@@ -81,7 +81,7 @@ gulp
   
        + [LESS](http://less.bootcss.com/#)  LESS 将 CSS 赋予了动态语言的特性，如 变量， 继承， 运算， 函数. 
   
-+ css优化（cssnano）
++ css优化（cssnano,你可以到cssnano的官网查看说明）
 
 ## **5.目录结构**
 ![iamge](md/i2.png)
