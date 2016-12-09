@@ -37,7 +37,9 @@ const gulp = require('gulp'),
     del = require('del'),
     dest = require('gulp-dest'),
     connect = require('gulp-connect'),
+    opacity=require('postcss-opacity'),
     less = require('gulp-less'),
+    postcss=require('gulp-postcss'),
     replace = require('gulp-replace'),
     autoprefixer = require('gulp-autoprefixer'),
     sourcemaps = require('gulp-sourcemaps'),
@@ -197,17 +199,39 @@ gulp.task('clean', function () {
                 buildDir.css + '/all.css.map'
             ]
         )
-    }, 3000)
+    }, 5000)
 
 })
 
 gulp.task('fix', function () {
-    return gulp.src(path.join(buildDir.css, 'all.css'))
-        .pipe(gcmq())
-        .pipe(gulpif(cssminify, cssnano({
-            discardComments: !1,
-            discardUnused: !1
-        })))
+    setTimeout(function(){
+        let processors = [
+            opacity()
+        ];
+        gulp.start('font-fix')
+        return gulp.src(path.join(buildDir.css, 'all.css'))
+            .pipe(postcss(processors))
+            .pipe(gcmq())
+            .pipe(gulpif(cssminify, cssnano({
+                discardComments: false,
+                discardUnused: false,
+                core:false
+            })))
+            .pipe(gulp.dest(buildDir.css))
+    },3000)
+})
+
+gulp.task('font-fix',function(){
+
+    return gulp.src(path.join(buildDir.css,'*.css'))
+        .pipe(
+            postcss([
+                require('postcss-font-magician')({
+                    hosted: '../fonts'
+                })
+            ])
+        )
+        .pipe(gulp.dest(buildDir.css))
 })
 
 gulp.task('defaultInit', function () {
