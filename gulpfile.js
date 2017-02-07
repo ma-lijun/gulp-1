@@ -48,8 +48,8 @@ const gulp = require('gulp'),
     watch = require('gulp-watch'),
     path = require('path'),
     remember = require('gulp-remember'),
-    cache=require('gulp-cached')
-
+    cache=require('gulp-cached'),
+    pug=require('gulp-pug'),
     notify = require('gulp-notify')
 
 gulp.task('connect', function () {
@@ -62,8 +62,8 @@ gulp.task('connect', function () {
     })
 })
 gulp.task('default', gulpSequence('defaultInit', ['clean', 'fix']))
-gulp.task('dev', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init', 'ipAndOpen']))
-gulp.task('test', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init']))
+gulp.task('dev', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchPug','watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init', 'ipAndOpen']))
+gulp.task('test', gulpSequence('connect', 'initWatch', ['watchHtml', 'watchPug','watchLess', 'watchTemplate', 'watchCss', 'watchLessInCssDir', 'init']))
 
 //初始化
 gulp.task('init', function () {
@@ -81,6 +81,11 @@ gulp.task('init', function () {
     gulp.src(path.join(src, '/**/*.html'), {base: src})
         .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
         .pipe(te())
+        .pipe(gulp.dest(build))
+
+    gulp.src(path.join(src, '/**/*.pug'), {base: src})
+        .pipe(plumber({errorHandler: notify.onError("pug模板编译错误 <%= error.message %>")}))
+        .pipe(pug())
         .pipe(gulp.dest(build))
 
     del(path.join(buildDir.css, 'less'))
@@ -123,6 +128,17 @@ gulp.task('watchHtml', function () {
             .pipe(changed(build))
             .pipe(plumber({errorHandler: notify.onError("html模板编译错误 <%= error.message %>")}))
             .pipe(te())
+            .pipe(gulp.dest(build))
+            .pipe(connect.reload())
+    }).on('unlink', function (path) {
+        del(path.replace('www', 'build'))
+    });
+})
+gulp.task('watchPug',function () {
+    return watch(asset.html+'**/*.pug',function () {
+        gulp.src(asset.html+'/**/*.pug',{base:asset.html})
+            .pipe(plumber({errorHandler:notify.onError('pug模板编译错误，请检查语法')}))
+            .pipe(pug())
             .pipe(gulp.dest(build))
             .pipe(connect.reload())
     }).on('unlink', function (path) {
